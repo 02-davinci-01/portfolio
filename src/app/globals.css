@@ -40,6 +40,25 @@ html {
   overflow-y: scroll;
 }
 
+/* Scale up for laptop/desktop — 110% base makes everything ~10% larger.
+   Only landscape viewports above tablet breakpoint. */
+@media (min-width: 1024px) and (orientation: landscape) {
+  html {
+    font-size: 110%;
+  }
+}
+
+/* Hide scrollbar during intro screen */
+html.intro-active {
+  overflow: hidden;
+}
+html.intro-active::-webkit-scrollbar {
+  display: none;
+}
+html.intro-active {
+  scrollbar-width: none;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -739,12 +758,17 @@ body.book-modal-open .bottom-nav {
   background: rgba(18, 18, 20, 0.92);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 4px;
   padding: 0;
   z-index: 20;
   pointer-events: none;
   max-width: 280px;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.5),
+    0 1px 4px rgba(0, 0, 0, 0.3),
+    0 0 40px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .terminal-dialog__body {

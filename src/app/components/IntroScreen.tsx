@@ -63,6 +63,7 @@ function IntroScreen({ onComplete }: { onComplete: () => void }) {
       onComplete();
       return;
     }
+    document.documentElement.classList.add('intro-active');
     document.body.style.overflow = "hidden";
     timeoutRef.current = setTimeout(typeNext, 600);
     return () => {
@@ -82,6 +83,7 @@ function IntroScreen({ onComplete }: { onComplete: () => void }) {
     if (!textExited || !backdropRef.current) return;
 
     // Fire hero entrance immediately — content materializes *through* the curtain
+    document.documentElement.classList.remove('intro-active');
     document.body.style.overflow = "";
     onComplete();
 

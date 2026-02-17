@@ -17,6 +17,24 @@ const StatueViewer = memo(function StatueViewer({ hovered = false }: StatueViewe
   const [isNearViewport, setIsNearViewport] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [faceTarget, setFaceTarget] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const dialogTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Delay dialog open so it appears after camera rotation completes (~700ms)
+  useEffect(() => {
+    if (dialogTimerRef.current) {
+      clearTimeout(dialogTimerRef.current);
+      dialogTimerRef.current = null;
+    }
+    if (hovered) {
+      dialogTimerRef.current = setTimeout(() => setDialogOpen(true), 700);
+    } else {
+      setDialogOpen(false);
+    }
+    return () => {
+      if (dialogTimerRef.current) clearTimeout(dialogTimerRef.current);
+    };
+  }, [hovered]);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -63,7 +81,6 @@ const StatueViewer = memo(function StatueViewer({ hovered = false }: StatueViewe
   const zoomedOrbit = "10deg 106deg 250%";
   const zoomedFov = "13deg";
   const isZoomed = hovered && !prefersReducedMotion;
-  const dialogOpen = hovered;
 
   return (
     <div

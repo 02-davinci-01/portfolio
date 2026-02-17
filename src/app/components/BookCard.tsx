@@ -13,6 +13,7 @@ interface BookCardProps {
   note: string;
   coverUrl: string;
   index: number;
+  tag?: string;
 }
 
 /* ── Book Modal (matches Section IV DesignModal pattern) ── */
@@ -21,12 +22,14 @@ function BookModal({
   author,
   note,
   coverUrl,
+  tag,
   onClose,
 }: {
   title: string;
   author: string;
   note: string;
   coverUrl: string;
+  tag?: string;
   onClose: () => void;
 }) {
   // Close on escape
@@ -104,9 +107,11 @@ function BookModal({
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2, duration: 0.5, ease: easeOut }}
         >
-          <span className="font-[family-name:var(--font-space)] text-[0.6rem] tracking-[0.3em] uppercase text-neutral-300 mb-2">
-            Currently Reading
-          </span>
+          {tag && (
+            <span className="font-[family-name:var(--font-space)] text-[0.6rem] tracking-[0.3em] uppercase text-neutral-300 mb-2">
+              {tag}
+            </span>
+          )}
           <h3 className="font-[family-name:var(--font-space)] text-lg font-semibold tracking-tight text-neutral-900">
             {title}
           </h3>
@@ -133,6 +138,7 @@ const BookCard = memo(function BookCard({
   note,
   coverUrl,
   index,
+  tag,
 }: BookCardProps) {
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -173,6 +179,11 @@ const BookCard = memo(function BookCard({
             <p className="text-sm text-neutral-400 font-mono mt-1">
               {author}
             </p>
+            {tag && (
+              <span className="inline-block mt-2 px-2 py-0.5 text-[0.45rem] font-mono tracking-[0.2em] uppercase border border-neutral-200 text-neutral-400 rounded-sm">
+                {tag}
+              </span>
+            )}
           </div>
         </div>
       </button>
@@ -186,6 +197,7 @@ const BookCard = memo(function BookCard({
             author={author}
             note={note}
             coverUrl={coverUrl}
+            tag={tag}
             onClose={closeModal}
           />
         )}

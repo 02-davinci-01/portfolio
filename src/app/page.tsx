@@ -1013,6 +1013,18 @@ export default function Home() {
                 }}
                 transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                 whileHover={{ y: -2 }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  const lenis = (window as any).__lenis;
+                  const target = document.querySelector(item.href);
+                  if (lenis && target) {
+                    // Use a very low lerp for a slow, deliberate glide to the section.
+                    // Instance lerp (0.08) is fast; 0.035 takes ~2-3x longer.
+                    lenis.scrollTo(target, { lerp: 0.035 });
+                  } else if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
               >
                 <span className="bottom-nav__hint">{item.hint}</span>
                 {item.label}
@@ -1576,6 +1588,7 @@ export default function Home() {
                       note={book.note}
                       coverUrl={book.coverUrl}
                       index={i}
+                      tag={i === 0 ? "Currently Reading" : undefined}
                     />
                   </div>
                 ))}
