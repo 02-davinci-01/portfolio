@@ -81,7 +81,6 @@ const ModelViewer = memo(function ModelViewer() {
       </div>
 
       {isNearViewport ? (
-        /* @ts-expect-error model-viewer is a web component with custom attributes */
         <model-viewer
           src="/personal_computer_pbr.glb"
           alt="3D Personal Computer"

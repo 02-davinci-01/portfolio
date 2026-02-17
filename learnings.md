@@ -240,4 +240,43 @@ When `overflow: hidden` is set on body to lock scroll during modals, the scrollb
 ### Modal navbar hiding (2026-02-16)
 Use `body.{name}-modal-open` class (added alongside `overflow:hidden`) to hide the bottom nav via CSS: `opacity: 0; pointer-events: none`. Classes: `design-modal-open`, `book-modal-open`, `music-modal-open`.
 
+### GSAP scrub + entrance animation conflict (2026-02-17)
+When an element starts with `style={{ opacity: 0 }}` and has BOTH an entrance `fromTo` animation AND a scroll-scrubbed `gsap.to()`, the scrub tween can record `0` as its starting opacity (since it's created before the entrance runs). Scrolling back to the top then restores the recorded start value — `0` — making the element vanish. **Fix:** (1) Gate the `useGSAP` scroll setup behind `introComplete` via `dependencies: [introComplete]` so the scrub tween is created AFTER the entrance fires. (2) Use `gsap.fromTo()` with explicit start values (`{ opacity: 1, scale: 1 }`) instead of `gsap.to()` so start values never depend on recording timing.
+
+### GSAP scrub + entrance animation conflict (2026-02-17)
+When an element starts with `style={{ opacity: 0 }}` and has BOTH an entrance `fromTo` animation AND a scroll-scrubbed `gsap.to()`, the scrub tween can record `0` as its starting opacity (since it's created before the entrance runs). Scrolling back to the top then restores the recorded start value — `0` — making the element vanish. **Fix:** Use `gsap.fromTo()` with explicit start values (`{ opacity: 1, scale: 1 }`) instead of `gsap.to()` so start values never depend on recording timing. Do NOT gate `useGSAP` behind a state variable via `dependencies` — see below.
+
+### `@gsap/react` useGSAP — conditional hook bug with `dependencies` (2026-02-17)
+`useGSAP` (v2.1.2) internally has `deferCleanup && useIsomorphicLayoutEffect(...)` — a **conditional hook call**. `deferCleanup` is truthy only when `dependencies` has length > 0. This means passing `dependencies: [someState]` allocates a different number of hooks than having no `dependencies`. In dev mode with HMR, switching between these causes "change in the order of Hooks" errors. **Rule: never add/remove `dependencies` on an existing `useGSAP` call. If you need to react to state changes, handle it inside the callback with early returns or use a separate `useEffect` to set a ref that the `useGSAP` callback reads.**
+
+### Lenis + body position:fixed scroll lock conflict (2026-02-17)
+The classic `body { position: fixed; top: -scrollYpx }` pattern for modal scroll locking breaks Lenis. Lenis's internal scroll tracker gets out of sync — on modal close, `window.scrollTo()` fires but Lenis overrides it with its stale target, snapping the user to the wrong section. **Fix:** Use `lenis.stop()` / `lenis.start()` instead. Expose the Lenis instance globally via `window.__lenis` from `SmoothScroll.tsx`.
+
+### Intro → hero transition: overlap, don't sequence (2026-02-17)
+The intro screen backdrop dissolve and hero entrance choreography must **overlap**, not run sequentially. If `onComplete` fires at the END of the dissolve, there's a ~1.7s dead gap (text gone → black dissolving → empty white → content pops in). **Fix:** fire `onComplete()` at the START of the dissolve (in the same `useEffect` that triggers the backdrop fade). The hero elements materialize *through* the fading curtain. Also: simplify the backdrop dissolve to a pure `opacity: 0` fade (no `blur(40px)` + `scale(1.08)` which creates a visible "event" rather than a transparent veil lift). Add a tiny `delay: 0.15` on the hero timeline so the veil starts lifting first, then content blooms.
+
+### GSAP ScrollTrigger `pin` + Lenis (2026-02-17)
+Pinned sections work with Lenis out of the box — GSAP's ScrollTrigger `pin: true` manipulates element transforms rather than `position: fixed`, so Lenis's virtual scroll stays in sync. Use `pinSpacing: true` (default) so the page layout accounts for the pinned duration. The `overflow: hidden` on the pinned section is important to prevent content leaking during the pin phase.
+
+### `scaleY` is not a valid CSS property for React `style` (2026-02-17)
+TypeScript's `CSSProperties` doesn't include GSAP shorthand transforms like `scaleY`. Using `style={{ scaleY: 0 }}` causes TS2353. **Fix:** use `style={{ transform: "scaleY(0)" }}` for the initial state. GSAP's own `.from()` / `.fromTo()` calls can use `{ scaleY: 0 }` since those go through GSAP's property parser, not React's style type.
+
+### `window as Record<string, unknown>` TS strictness (2026-02-17)
+TypeScript strict mode doesn't allow `(window as Record<string, unknown>)` because `Window` has an index signature mismatch. **Fix:** double-cast via `(window as unknown as Record<string, unknown>)`.
+
+### model-viewer default progress bar — gray loading bar (2026-02-17)
+The `::part(default-progress-bar) { display: none }` CSS approach is unreliable — model-viewer can re-inject or re-style the bar internally. **Bulletproof fix:** slot an empty element as a child: `<span slot="progress-bar" />`. This replaces the default progress bar entirely via the web component's slot mechanism. Keep the CSS `::part()` rule as a belt-and-suspenders fallback. Applied to all 7 model-viewer instances (StatueViewer, DostoevskyBust, OperaDaVinci, JourneyComputer, CraftRedbull, PabulumHelmet, NexusDog).
+
+### 3D model scroll entrance — "Through the Mist" pattern (2026-02-17)
+Section 3D models use a GSAP ScrollTrigger entrance: `opacity: 0, scale: 1.08, filter: "blur(18px)"` → `opacity: 1, scale: 1, filter: "blur(0px)"` over 1.2s with `power2.out`. No directional movement (x/y) — pure materialization from fog. This avoids visual conflict with the model's fixed absolute positioning on the right side of each section. `transformOrigin: "center center"` ensures the scale contracts inward symmetrically.
+
+### model-viewer.d.ts — React 19 JSX namespace (2026-02-17)
+React 19 with `jsx: "react-jsx"` in `tsconfig.json` uses `React.JSX.IntrinsicElements`, NOT the global `JSX.IntrinsicElements`. The old `declare namespace JSX { ... }` pattern doesn't work — types are silently ignored and every `<model-viewer>` needs `@ts-expect-error`. **Fix:** use `declare module "react" { namespace JSX { interface IntrinsicElements { ... } } }` with `import "react"` at the top to make it an ambient module augmentation. Eliminates all `@ts-expect-error` directives across 7+ components. Also added `interpolation-decay` and `auto-rotate-delay: number | string` to the type.
+
+### 3D model floating animation (2026-02-17)
+CSS-only `model-float-inner` class uses `animation: model-float 4.5s ease-in-out infinite` for a gentle 14px up/down bob. Paired with `model-shadow` (a blurred ellipse at the container bottom) that pulses inversely via `model-shadow-pulse` — shadow shrinks as model rises, expands as it falls. Both respect `prefers-reduced-motion`. Each model component wraps `<model-viewer>` in a `<div className="model-float-inner">` and adds a sibling `<div className="model-shadow" />`.
+
+### Design gallery staggered layout via GSAP (2026-02-17)
+Design cards use GSAP for staggered `y`-offset reveals instead of CSS `transform: translateY()`. GSAP animates to different `y` end values based on column position (`i % 3` for desktop, `i % 2` for mobile), creating a masonry-like stagger. This avoids CSS/GSAP transform conflicts and lets the stagger animate in naturally as part of the section's assembly choreography.
+
 *Append new findings as they come. Keep entries concise. Date-stamp bug fixes.*

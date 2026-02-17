@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import RevealOnScroll from "./components/RevealOnScroll";
 import SplitText from "./components/SplitText";
 import ScrambleText from "./components/ScrambleText";
@@ -15,6 +15,8 @@ import FlowDiagram from "./components/FlowDiagram";
 import DesignGallery from "./components/DesignGallery";
 import BookCard from "./components/BookCard";
 import MusicCard from "./components/MusicCard";
+import IntroScreen from "./components/IntroScreen";
+import { gsap, useGSAP } from "@/app/lib/gsap";
 
 const CraftRedbull = dynamic(
   () => import("./components/CraftRedbull"),
@@ -185,6 +187,9 @@ function Divider() {
    ═══════════════════════════════════════════════════════════════════ */
 
 export default function Home() {
+  const [introComplete, setIntroComplete] = useState(false);
+  const handleIntroComplete = useCallback(() => setIntroComplete(true), []);
+
   const statueHover = useStatueHover();
   const dostoevskyHover = useStatueHover();
 
@@ -196,9 +201,49 @@ export default function Home() {
     { label: "Nexus", href: "#nexus", hint: "Connect" },
   ];
 
+  /* ── Refs for GSAP scroll animations ── */
+  const heroRef = useRef<HTMLElement>(null);
+  const heroTextRef = useRef<HTMLDivElement>(null);
+  const statueWrapperRef = useRef<HTMLDivElement>(null);
+  const scrollIndicatorRef = useRef<HTMLDivElement>(null);
+  const iterRef = useRef<HTMLElement>(null);
+  const timelineLineRef = useRef<HTMLDivElement>(null);
+
+  /* ── Refs for Batch C: Divine Hermit pinned reveal ── */
+  const closingRef = useRef<HTMLElement>(null);
+  const bustWrapperRef = useRef<HTMLDivElement>(null);
+  const divineRef = useRef<HTMLSpanElement>(null);
+  const hermitRef = useRef<HTMLSpanElement>(null);
+  const closingAnimDone = useRef(false);
+  const [closingHoverable, setClosingHoverable] = useState(false);
+
+  /* ── Refs for hero entrance choreography ── */
+  const headerRef = useRef<HTMLElement>(null);
+  const sideRuleRef = useRef<HTMLDivElement>(null);
+  const heroTaglineRef = useRef<HTMLDivElement>(null);
+  const heroNameRef = useRef<HTMLDivElement>(null);
+  const heroQuoteRef = useRef<HTMLDivElement>(null);
+
   /* ── Active section tracking ── */
   const [activeSection, setActiveSection] = useState<string>("");
   const [navVisible, setNavVisible] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  /* ── Detect modal-open body classes via MutationObserver ── */
+  useEffect(() => {
+    const check = () => {
+      const cl = document.body.classList;
+      setModalOpen(
+        cl.contains("design-modal-open") ||
+        cl.contains("book-modal-open") ||
+        cl.contains("music-modal-open")
+      );
+    };
+    const observer = new MutationObserver(check);
+    observer.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+    check();
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const sectionIds = navItems.map((item) => item.href.replace("#", ""));
@@ -223,6 +268,10 @@ export default function Home() {
   /* ── Show navbar after scrolling past hero, hide at closing section ── */
   useEffect(() => {
     const handleScroll = () => {
+      // While a modal is open, don't touch nav state.
+      const cl = document.body.classList;
+      if (cl.contains("design-modal-open") || cl.contains("book-modal-open") || cl.contains("music-modal-open")) return;
+
       const closingEl = document.getElementById("closing");
       const pastHero = window.scrollY > window.innerHeight * 0.6;
       const atClosing = closingEl
@@ -235,94 +284,789 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  /* ── Hero entrance choreography — fires once after intro completes ──
+   * Starts *simultaneously* with the backdrop dissolve so content
+   * materializes through the fading curtain — no dead gap. */
+  useEffect(() => {
+    if (!introComplete) return;
+
+    const tl = gsap.timeline({
+      defaults: { ease: "power3.out" },
+      delay: 0.15, // tiny breath — let the veil start lifting first
+    });
+
+    // Statue materializes first — the big visual, blooms through the curtain
+    if (statueWrapperRef.current) {
+      tl.fromTo(
+        statueWrapperRef.current,
+        { opacity: 0, scale: 0.97 },
+        { opacity: 1, scale: 1, duration: 0.9 },
+        0
+      );
+    }
+
+    // Header fades in from above
+    if (headerRef.current) {
+      tl.fromTo(
+        headerRef.current,
+        { opacity: 0, y: -12 },
+        { opacity: 1, y: 0, duration: 0.6 },
+        0.2
+      );
+    }
+
+    // Side rule slides in
+    if (sideRuleRef.current) {
+      tl.fromTo(
+        sideRuleRef.current,
+        { opacity: 0, x: -10 },
+        { opacity: 1, x: 0, duration: 0.6 },
+        0.25
+      );
+    }
+
+    // Tagline — light, fast
+    if (heroTaglineRef.current) {
+      tl.fromTo(
+        heroTaglineRef.current,
+        { opacity: 0, y: 14 },
+        { opacity: 1, y: 0, duration: 0.5 },
+        0.35
+      );
+    }
+
+    // Name — the anchor, slightly slower
+    if (heroNameRef.current) {
+      tl.fromTo(
+        heroNameRef.current,
+        { opacity: 0, y: 18 },
+        { opacity: 1, y: 0, duration: 0.55 },
+        0.45
+      );
+    }
+
+    // Quote — last text element, drifts in gently
+    if (heroQuoteRef.current) {
+      tl.fromTo(
+        heroQuoteRef.current,
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.5 },
+        0.6
+      );
+
+      // Underline draws under "Sisyphus happy" after quote settles
+      // Underline draws under "Sisyphus happy" after quote settles
+      tl.fromTo(
+        '.hero-underline-reveal',
+        { '--underline-scale': 0 },
+        { '--underline-scale': 1, duration: 1.2, ease: 'power2.out' },
+        1.3
+      );
+    }
+
+    // Scroll indicator — arrives last, subtle
+    if (scrollIndicatorRef.current) {
+      tl.fromTo(
+        scrollIndicatorRef.current,
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.45 },
+        0.8
+      );
+    }
+
+    return () => { tl.kill(); };
+  }, [introComplete]);
+
+  /* ── Batch B: Timeline line draw + Divider grow ── */
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+
+      mm.add(
+        {
+          desktop: "(min-width: 768px)",
+          reduced: "(prefers-reduced-motion: reduce)",
+        },
+        (context) => {
+          const { desktop, reduced } = context.conditions!;
+
+          if (reduced) return;
+
+          // B1: Timeline line — scaleY from 0 → 1, scrubbed to scroll
+          if (desktop && timelineLineRef.current) {
+            gsap.fromTo(
+              timelineLineRef.current,
+              { scaleY: 0 },
+              {
+                scaleY: 1,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: iterRef.current,
+                  start: "top 60%",
+                  end: "bottom 40%",
+                  scrub: 0.3,
+                },
+              }
+            );
+
+            // B1: Timeline dots — fade + scale in as line reaches them
+            const dots = gsap.utils.toArray<HTMLElement>(".timeline-dot");
+            dots.forEach((dot) => {
+              gsap.fromTo(
+                dot,
+                { opacity: 0, scale: 0 },
+                {
+                  opacity: 1,
+                  scale: 1,
+                  duration: 0.4,
+                  ease: "power3.out",
+                  scrollTrigger: {
+                    trigger: dot,
+                    start: "top 75%",
+                    toggleActions: "play none none none",
+                  },
+                }
+              );
+            });
+          }
+
+          // B2: Divider lines — scaleX from 0 → 1, grow from center, one-shot
+          const dividers = gsap.utils.toArray<HTMLElement>(".section-divider");
+          dividers.forEach((divider) => {
+            gsap.fromTo(
+              divider,
+              { scaleX: 0 },
+              {
+                scaleX: 1,
+                duration: 0.8,
+                ease: "power3.out",
+                scrollTrigger: {
+                  trigger: divider,
+                  start: "top 90%",
+                  toggleActions: "play none none none",
+                },
+              }
+            );
+          });
+        }
+      );
+    },
+    { dependencies: [] }
+  );
+
+  /* ── Batch C: Divine Hermit pinned reveal ── */
+  useGSAP(
+    () => {
+      if (!closingRef.current) return;
+
+      const mm = gsap.matchMedia();
+
+      mm.add(
+        {
+          desktop: "(min-width: 768px)",
+          mobile: "(max-width: 767px)",
+          reduced: "(prefers-reduced-motion: reduce)",
+        },
+        (context) => {
+          const { desktop, reduced } = context.conditions!;
+
+          // Respect reduced-motion — show everything immediately, no pin
+          if (reduced) {
+            gsap.set([bustWrapperRef.current, divineRef.current, hermitRef.current], {
+              opacity: 1,
+              x: 0,
+              y: 0,
+              scale: 1,
+            });
+            return;
+          }
+
+          if (desktop) {
+            // Desktop: full pinned choreography — generous scroll runway
+            const tl = gsap.timeline({
+              scrollTrigger: {
+                trigger: closingRef.current,
+                start: "top 80%",
+                end: "top 20%",
+                pin: false,
+                scrub: 0.5,
+                onUpdate: (self) => {
+                  // Only enable hover after scrub is nearly done
+                  const done = self.progress > 0.92;
+                  if (done !== closingAnimDone.current) {
+                    closingAnimDone.current = done;
+                    setClosingHoverable(done);
+                  }
+                },
+              },
+            });
+
+            // Bust rises — the centrepiece
+            tl.fromTo(bustWrapperRef.current,
+              { scale: 0.88, y: 50, opacity: 0 },
+              { scale: 1, y: 0, opacity: 1, duration: 1.4, ease: "power2.out" },
+            )
+            // Text sweeps in as bust nears full appearance (starts at ~50% of bust anim)
+              .fromTo(
+                divineRef.current,
+                { x: -100, opacity: 0 },
+                { x: 0, opacity: 1, duration: 0.8, ease: "power2.out" },
+                "-=0.8"
+              )
+              .fromTo(
+                hermitRef.current,
+                { x: 100, opacity: 0 },
+                { x: 0, opacity: 1, duration: 0.8, ease: "power2.out" },
+                "<"
+              );
+          } else {
+            // Mobile: simpler non-pinned entrance
+            gsap.fromTo(bustWrapperRef.current,
+              { y: 40, opacity: 0.3 },
+              {
+                y: 0, opacity: 1,
+                duration: 0.8,
+                ease: "power3.out",
+                scrollTrigger: {
+                  trigger: closingRef.current,
+                  start: "top 80%",
+                  toggleActions: "play none none none",
+                },
+              }
+            );
+
+            gsap.fromTo(divineRef.current,
+              { x: -60, opacity: 0 },
+              {
+                x: 0, opacity: 1,
+                duration: 0.6,
+                ease: "power3.out",
+                scrollTrigger: {
+                  trigger: closingRef.current,
+                  start: "top 70%",
+                  toggleActions: "play none none none",
+                },
+              }
+            );
+
+            gsap.fromTo(hermitRef.current,
+              { x: 60, opacity: 0 },
+              {
+                x: 0, opacity: 1,
+                duration: 0.6,
+                ease: "power3.out",
+                scrollTrigger: {
+                  trigger: closingRef.current,
+                  start: "top 70%",
+                  toggleActions: "play none none none",
+                },
+              }
+            );
+          }
+        }
+      );
+    },
+    { dependencies: [] }
+  );
+
+  /* ── Hero parallax-out + scroll indicator fade (Batch A) ── */
+  useGSAP(
+    () => {
+      if (!heroRef.current) return;
+
+      const mm = gsap.matchMedia();
+
+      mm.add(
+        {
+          desktop: "(min-width: 768px)",
+          mobile: "(max-width: 767px)",
+          reduced: "(prefers-reduced-motion: reduce)",
+        },
+        (context) => {
+          const { desktop, reduced } = context.conditions!;
+
+          // Respect reduced-motion — skip all scroll animations
+          if (reduced) return;
+
+          // A1: Hero text drifts up + fades as user scrolls past hero
+          if (heroTextRef.current) {
+            gsap.fromTo(
+              heroTextRef.current,
+              { y: 0, opacity: 1 },
+              {
+                y: desktop ? -50 : -30,
+                opacity: 0,
+                scrollTrigger: {
+                  trigger: heroRef.current,
+                  start: "top top",
+                  end: "bottom 60%",
+                  scrub: 0.5,
+                },
+              }
+            );
+          }
+
+          // A1: Statue lingers slightly longer, then fades + shrinks
+          if (statueWrapperRef.current) {
+            gsap.fromTo(
+              statueWrapperRef.current,
+              { opacity: 1, scale: 1 },
+              {
+                opacity: 0,
+                scale: 0.97,
+                scrollTrigger: {
+                  trigger: heroRef.current,
+                  start: "top top",
+                  end: "bottom 40%",
+                  scrub: 0.5,
+                },
+              }
+            );
+          }
+
+          // A2: Scroll indicator vanishes quickly on first scroll
+          if (scrollIndicatorRef.current) {
+            gsap.fromTo(
+              scrollIndicatorRef.current,
+              { opacity: 1, y: 0 },
+              {
+                opacity: 0,
+                y: -10,
+                scrollTrigger: {
+                  trigger: heroRef.current,
+                  start: "top top",
+                  end: "5% top",
+                  scrub: true,
+                },
+              }
+            );
+          }
+        }
+      );
+    },
+    { scope: heroRef }
+  );
+
+  /* ── Batch D: Section assembly choreography ──
+   * Each section feels "assembled" as its parts arrive in a staggered
+   * choreography — heading slides in, content builds up, model materializes
+   * through mist, project cards cascade. Creates the same assembled feeling
+   * as the hero entrance but driven by scroll position. */
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+
+      mm.add(
+        {
+          desktop: "(min-width: 768px)",
+          mobile: "(max-width: 767px)",
+          reduced: "(prefers-reduced-motion: reduce)",
+        },
+        (context) => {
+          const { desktop, reduced } = context.conditions!;
+
+          if (reduced) {
+            gsap.set(".project-card, .book-card-reveal, .music-card-reveal, .section-model, .section-heading-wrapper, .section-assembly", {
+              opacity: 1,
+              y: 0,
+              x: 0,
+              scale: 1,
+              filter: "blur(0px)",
+            });
+            return;
+          }
+
+          // ── Section assembly: coordinated per-section entrance ──
+          // For each major section, create a timeline that choreographs
+          // the heading, content, and model arriving in staggered sequence.
+          const sections = gsap.utils.toArray<HTMLElement>(
+            "#opera, #iter, #artificium, #afflatus, #nexus"
+          );
+
+          sections.forEach((section) => {
+            const heading = section.querySelector(".section-heading-wrapper");
+            const indexNum = section.querySelector(".index-number");
+            const model = section.querySelector(".section-model");
+
+            // Heading assembly — index number slides from left, heading fades up
+            if (heading) {
+              const tl = gsap.timeline({
+                scrollTrigger: {
+                  trigger: section,
+                  start: "top 78%",
+                  toggleActions: "play none none none",
+                },
+              });
+
+              // Index numeral sweeps in from the left
+              if (indexNum) {
+                tl.fromTo(
+                  indexNum,
+                  { opacity: 0, x: desktop ? -40 : -20 },
+                  { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" },
+                  0
+                );
+              }
+
+              // Heading text rises up
+              tl.fromTo(
+                heading,
+                { opacity: 0, y: 20 },
+                { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" },
+                0.15
+              );
+            }
+
+            // 3D model — "Through the Mist" with slight upward drift
+            if (model) {
+              const modelTl = gsap.timeline({
+                scrollTrigger: {
+                  trigger: section,
+                  start: "top 72%",
+                  toggleActions: "play none none none",
+                },
+              });
+
+              modelTl.fromTo(
+                model,
+                {
+                  opacity: 0,
+                  scale: 1.06,
+                  y: 30,
+                  filter: "blur(16px)",
+                  transformOrigin: "center center",
+                },
+                {
+                  opacity: 1,
+                  scale: 1,
+                  y: 0,
+                  filter: "blur(0px)",
+                  duration: 1.3,
+                  ease: "power2.out",
+                },
+                0
+              );
+            }
+          });
+
+          // D1: Project cards — staggered cascade, each card assembles piece by piece
+          const projectCards = gsap.utils.toArray<HTMLElement>(".project-card");
+          projectCards.forEach((card, i) => {
+            const isReversed = i % 2 === 1;
+            const diagram = card.querySelector('[class*="aspect-"]');
+            const info = card.querySelector('[class*="space-y"]');
+
+            const tl = gsap.timeline({
+              scrollTrigger: {
+                trigger: card,
+                start: "top 85%",
+                toggleActions: "play none none none",
+              },
+            });
+
+            // Diagram slides in from its side
+            if (diagram) {
+              tl.fromTo(
+                diagram,
+                { opacity: 0, x: isReversed ? 30 : -30, y: 10 },
+                { opacity: 1, x: 0, y: 0, duration: 0.7, ease: "power3.out" },
+                0
+              );
+            }
+
+            // Info slides in from the opposite side
+            if (info) {
+              tl.fromTo(
+                info,
+                { opacity: 0, x: isReversed ? -20 : 20 },
+                { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" },
+                0.12
+              );
+            }
+
+            // Overall card fade as a safety net
+            tl.fromTo(
+              card,
+              { opacity: 0 },
+              { opacity: 1, duration: 0.4 },
+              0
+            );
+          });
+
+          // D2: Book cards — slide from left with stagger
+          // clearProps: "transform" removes the residual translate3d(0,0,0)
+          // which would create a containing block and break position:fixed modals inside
+          const bookCards = gsap.utils.toArray<HTMLElement>(".book-card-reveal");
+          bookCards.forEach((card, i) => {
+            gsap.fromTo(
+              card,
+              { opacity: 0, x: -24, y: 8 },
+              {
+                opacity: 1,
+                x: 0,
+                y: 0,
+                duration: 0.6,
+                delay: i * 0.08,
+                ease: "power3.out",
+                clearProps: "transform",
+                scrollTrigger: {
+                  trigger: card,
+                  start: "top 88%",
+                  toggleActions: "play none none none",
+                },
+              }
+            );
+          });
+
+          // D2: Music cards — slide from right with stagger
+          const musicCards = gsap.utils.toArray<HTMLElement>(".music-card-reveal");
+          musicCards.forEach((card, i) => {
+            gsap.fromTo(
+              card,
+              { opacity: 0, x: 24, y: 8 },
+              {
+                opacity: 1,
+                x: 0,
+                y: 0,
+                duration: 0.6,
+                delay: i * 0.08,
+                ease: "power3.out",
+                clearProps: "transform",
+                scrollTrigger: {
+                  trigger: card,
+                  start: "top 88%",
+                  toggleActions: "play none none none",
+                },
+              }
+            );
+          });
+
+          // Design cards — staggered reveal from below
+          const designCards = gsap.utils.toArray<HTMLElement>(".design-card");
+          designCards.forEach((card, i) => {
+            gsap.fromTo(
+              card,
+              { opacity: 0, y: 30 },
+              {
+                opacity: 1,
+                y: 0,
+                duration: 0.7,
+                delay: i * 0.09,
+                ease: "power3.out",
+                clearProps: "transform",
+                scrollTrigger: {
+                  trigger: card.closest(".design-gallery") || card,
+                  start: "top 85%",
+                  toggleActions: "play none none none",
+                },
+              }
+            );
+          });
+        }
+      );
+    },
+    { dependencies: [] }
+  );
+
+  /* ── Batch E: Scroll Rhythm — depth cues across all sections ──
+   * 1. Ghost roman numerals drift at a slightly offset speed → depth layer
+   * 2. 3D section models float gently → different plane
+   * 3. Section content fades out softly as it scrolls away → flow rhythm
+   */
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+
+      mm.add(
+        {
+          desktop: "(min-width: 768px)",
+          reduced: "(prefers-reduced-motion: reduce)",
+        },
+        (context) => {
+          const { desktop, reduced } = context.conditions!;
+          if (reduced || !desktop) return;
+
+          // E1: Ghost numeral drift — translates slower than content, reads as depth
+          const indexNumbers = gsap.utils.toArray<HTMLElement>(".index-number");
+          indexNumbers.forEach((el) => {
+            const section = el.closest("section");
+            if (!section) return;
+
+            gsap.fromTo(
+              el,
+              { yPercent: 0 },
+              {
+                yPercent: -15,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: section,
+                  start: "top bottom",
+                  end: "bottom top",
+                  scrub: 0.3,
+                },
+              }
+            );
+          });
+
+          // E2: 3D model gentle float — slight y-drift, different scroll plane
+          const sectionModels = gsap.utils.toArray<HTMLElement>(".section-model");
+          sectionModels.forEach((model) => {
+            const section = model.closest("section");
+            if (!section) return;
+
+            gsap.fromTo(
+              model,
+              { y: 30 },
+              {
+                y: -30,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: section,
+                  start: "top bottom",
+                  end: "bottom top",
+                  scrub: 0.4,
+                },
+              }
+            );
+          });
+
+          // E3: Section content fade-out — gently dims as section scrolls away
+          const contentSections = gsap.utils.toArray<HTMLElement>(
+            "#opera, #iter, #artificium, #afflatus, #nexus"
+          );
+          contentSections.forEach((section) => {
+            // Target the z-10 content wrapper (not the 3D model)
+            const contentWrapper = section.querySelector(".relative.z-10, .relative.z-\\[20\\]");
+            if (!contentWrapper) return;
+
+            gsap.fromTo(
+              contentWrapper,
+              { opacity: 1 },
+              {
+                opacity: 0.15,
+                ease: "power1.in",
+                scrollTrigger: {
+                  trigger: section,
+                  start: "60% top",   // starts fading when 60% of section has passed viewport top
+                  end: "bottom top",  // fully dim by the time section leaves
+                  scrub: 0.3,
+                },
+              }
+            );
+          });
+        }
+      );
+    },
+    { dependencies: [] }
+  );
+
   return (
-    <main className="min-h-screen bg-[var(--background)] overflow-x-hidden">
-      <CustomCursor />
-      <GrainOverlay />
+    <>
+      <IntroScreen onComplete={handleIntroComplete} />
+
+      <main className="min-h-screen bg-[var(--background)] overflow-x-hidden">
+        <CustomCursor />
+        <GrainOverlay />
 
       {/* ── BOTTOM GLASS NAV ── */}
-      <AnimatePresence>
-        {navVisible && (
-          <motion.nav
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 20, opacity: 0 }}
-            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            className="bottom-nav"
-          >
-            <motion.div
-              className="bottom-nav__inner"
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: {},
-                visible: { transition: { staggerChildren: 0.06, delayChildren: 0.12 } },
-              }}
-            >
-              {navItems.map((item) => {
-                const id = item.href.replace("#", "");
-                const isActive = activeSection === id;
-                return (
-                  <motion.a
-                    key={item.href}
-                    href={item.href}
-                    data-cursor-hover
-                    className={`bottom-nav__link${
-                      isActive ? " bottom-nav__link--active" : ""
-                    }`}
-                    variants={{
-                      hidden: { opacity: 0, y: 6 },
-                      visible: { opacity: 1, y: 0 },
-                    }}
-                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                    whileHover={{ y: -2 }}
-                  >
-                    <span className="bottom-nav__hint">{item.hint}</span>
-                    {item.label}
-                    {isActive && (
-                      <motion.span
-                        className="bottom-nav__indicator"
-                        layoutId="nav-indicator"
-                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                      />
-                    )}
-                  </motion.a>
-                );
-              })}
-            </motion.div>
-          </motion.nav>
-        )}
-      </AnimatePresence>
+      <motion.nav
+        initial={{ y: 20, opacity: 0 }}
+        animate={
+          navVisible && !modalOpen
+            ? { y: 0, opacity: 1, scale: 1, filter: "blur(0px)" }
+            : modalOpen && navVisible
+              ? { y: 0, opacity: 0.3, scale: 0.96, filter: "blur(2px)" }
+              : { y: 20, opacity: 0, scale: 1, filter: "blur(0px)" }
+        }
+        transition={
+          // Returning from modal → longer, gentler fade-in
+          !modalOpen && navVisible
+            ? { duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.15 }
+            : { duration: 0.4, ease: [0.16, 1, 0.3, 1] }
+        }
+        className="bottom-nav"
+        style={{ pointerEvents: navVisible && !modalOpen ? "auto" : "none" }}
+      >
+        <motion.div
+          className="bottom-nav__inner"
+          initial="hidden"
+          animate={navVisible ? "visible" : "hidden"}
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.06, delayChildren: 0.12 } },
+          }}
+        >
+          {navItems.map((item) => {
+            const id = item.href.replace("#", "");
+            const isActive = activeSection === id;
+            return (
+              <motion.a
+                key={item.href}
+                href={item.href}
+                data-cursor-hover
+                className={`bottom-nav__link${
+                  isActive ? " bottom-nav__link--active" : ""
+                }`}
+                variants={{
+                  hidden: { opacity: 0, y: 6 },
+                  visible: { opacity: 1, y: 0 },
+                }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                whileHover={{ y: -2 }}
+              >
+                <span className="bottom-nav__hint">{item.hint}</span>
+                {item.label}
+                {isActive && (
+                  <motion.span
+                    className="bottom-nav__indicator"
+                    layoutId="nav-indicator"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+              </motion.a>
+            );
+          })}
+        </motion.div>
+      </motion.nav>
 
       {/* Left vertical side line + label */}
       <motion.div
+        ref={sideRuleRef}
         className="side-rule"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: navVisible ? 0 : 1 }}
+        style={{ opacity: 0 }}
+        animate={{ opacity: introComplete && !navVisible ? 1 : 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         aria-hidden="true"
       >
         <span className="side-rule__text">Portfolio</span>
         <span className="side-rule__line" />
-        <span className="side-rule__text">MMXXVI</span>
+        <span className="side-rule__text">CXVIII/CX</span>
       </motion.div>
 
       {/* Top bar */}
-      <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 md:px-16 py-5 mix-blend-difference">
-        <span className="text-xs font-mono tracking-[0.4em] uppercase text-white">
-          V.N.
-        </span>
+      <header
+        ref={headerRef}
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-end px-8 md:px-16 py-5 mix-blend-difference"
+        style={{ opacity: 0 }}
+      >
         <span className="text-xs font-mono tracking-[0.3em] uppercase text-white/50">
-          MMXXVI
+          CXVIII/CX
         </span>
       </header>
 
       {/* ═══════════════════════════════════════════════════════════════
          I. PRINCIPIUM — The Beginning (Hero / Intro)
          ═══════════════════════════════════════════════════════════════ */}
-      <section className="relative h-screen flex flex-col justify-end pb-16 px-8 md:px-16 lg:px-24">
+      <section
+        ref={heroRef}
+        className="relative h-screen flex flex-col justify-end pb-16 px-8 md:px-16 lg:px-24"
+      >
         {/* 3D statue — centered-right, hover reveals archaic resume dialog */}
-        <div className="absolute inset-0 flex items-end justify-center md:justify-end pointer-events-none">
+        <div
+          ref={statueWrapperRef}
+          className="absolute inset-0 flex items-end justify-center md:justify-end pointer-events-none"
+          style={{ opacity: 0 }}
+        >
           <div className="w-[80vw] h-[85vh] md:w-[55vw] md:h-[95vh] md:-translate-x-[3vw]">
             <StatueViewer hovered={statueHover.hovered} />
           </div>
@@ -337,22 +1081,14 @@ export default function Home() {
         />
 
         {/* Hero text */}
-        <div className="relative z-10 max-w-2xl">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-          >
+        <div ref={heroTextRef} className="relative z-10 max-w-2xl">
+          <div ref={heroTaglineRef} style={{ opacity: 0 }}>
             <p className="font-mono text-[0.55rem] tracking-[0.4em] uppercase text-neutral-400 mb-5">
               I like to make stuff :)
             </p>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          >
+          <div ref={heroNameRef} style={{ opacity: 0 }}>
             <h1 className="text-[clamp(2rem,5vw,4.5rem)] font-bold tracking-tighter leading-[0.9] text-neutral-900 font-[family-name:var(--font-jetbrains)]">
               <ScrambleText
                 defaultText="02-davinci-01"
@@ -360,17 +1096,13 @@ export default function Home() {
                 charSpeed={25}
               />
             </h1>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          >
+          <div ref={heroQuoteRef} style={{ opacity: 0 }}>
             <p className="text-[0.6rem] font-mono leading-relaxed text-neutral-400 mt-8 max-w-sm">
-              &ldquo;One must imagine Sisyphus happy as he taps on the keyboard.&rdquo;
+              &ldquo;One must imagine <span className="hero-underline-reveal">Sisyphus happy</span> as he taps on the keyboard.&rdquo;
             </p>
-          </motion.div>
+          </div>
 
 
         </div>
@@ -390,10 +1122,11 @@ export default function Home() {
           </RevealOnScroll>
         </div>
 
-        {/* Scroll indicator */}
-        <RevealOnScroll
-          delay={1.0}
+        {/* Scroll indicator — GSAP entrance after intro, scroll-scrubbed exit */}
+        <div
+          ref={scrollIndicatorRef}
           className="absolute bottom-8 left-1/2 -translate-x-1/2"
+          style={{ opacity: 0 }}
         >
           <div className="flex flex-col items-center gap-2">
             <span className="font-mono text-[0.55rem] tracking-[0.4em] uppercase text-neutral-300">
@@ -401,20 +1134,20 @@ export default function Home() {
             </span>
             <div className="w-px h-8 bg-gradient-to-b from-neutral-300 to-transparent" />
           </div>
-        </RevealOnScroll>
+        </div>
       </section>
 
       {/* ── Marquee ── */}
       <MarqueeStrip
         words={[
-          "Next.js",
-          "React",
-          "Three.js",
-          "TypeScript",
-          "WebGL",
-          "Node.js",
-          "Creative Dev",
+          "Typescript",
           "UI/UX",
+          "Design",
+          "NestJS",
+          "NextJS",
+          "Go",
+          "Terraform",
+          "Bash",
         ]}
         className="py-6 border-y border-neutral-100"
       />
@@ -427,7 +1160,7 @@ export default function Home() {
         className="relative py-32 md:py-48 px-8 md:px-16 lg:px-24"
       >
         {/* 3D Da Vinci bust — positioned right, mirroring Journey/Craft sections */}
-        <div className="absolute top-0 right-0 bottom-0 w-full md:w-[45%] flex items-start justify-center pointer-events-none" style={{ paddingTop: '2rem' }}>
+        <div className="section-model absolute top-0 right-0 bottom-0 w-full md:w-[45%] flex items-start justify-center pointer-events-none" style={{ paddingTop: '2rem', opacity: 0 }}>
           <div className="w-[60%] h-[65%] max-h-[460px]">
             <OperaDaVinci />
           </div>
@@ -449,8 +1182,7 @@ export default function Home() {
           {/* Project cards */}
           <div className="space-y-24 md:space-y-32">
             {/* Project 1 — 1-byte */}
-            <RevealOnScroll>
-              <div className="group grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+              <div className="project-card group grid grid-cols-1 md:grid-cols-12 gap-6 items-center" style={{ opacity: 0 }}>
                 <div className="md:col-span-7 relative overflow-hidden bg-white aspect-[16/10] flex items-center justify-center border border-neutral-100 hover:border-neutral-300 transition-colors duration-500 p-4 md:p-6">
                   <FlowDiagram
                     nodes={oneByteNodes}
@@ -478,6 +1210,7 @@ export default function Home() {
                 <div className="md:col-span-4 md:col-start-9 space-y-3">
                   <h3 className="text-2xl font-bold tracking-tight text-neutral-900 group-hover:tracking-normal transition-all duration-500 font-[family-name:var(--font-space)]">
                     1-byte
+                    <span className="ml-2 align-middle inline-block font-mono text-[0.45rem] tracking-[0.15em] uppercase px-1.5 py-px border border-neutral-300/80 text-neutral-400 rounded-[2px] leading-tight">In Progress</span>
                   </h3>
                   <p className="text-sm text-neutral-400 leading-relaxed font-mono">
                     Browser-based peer-to-peer file sharing. WebRTC DataChannels
@@ -489,11 +1222,9 @@ export default function Home() {
                   </span>
                 </div>
               </div>
-            </RevealOnScroll>
 
             {/* Project 2 — 02-rBOR (reversed) */}
-            <RevealOnScroll>
-              <div className="group grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+              <div className="project-card group grid grid-cols-1 md:grid-cols-12 gap-6 items-center" style={{ opacity: 0 }}>
                 <div className="md:col-span-4 space-y-3 md:text-right order-2 md:order-1">
                   <h3 className="text-2xl font-bold tracking-tight text-neutral-900 group-hover:tracking-normal transition-all duration-500 font-[family-name:var(--font-space)]">
                     02-rBOR
@@ -545,11 +1276,9 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-            </RevealOnScroll>
 
             {/* Project 3 — mo-money */}
-            <RevealOnScroll>
-              <div className="group grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+              <div className="project-card group grid grid-cols-1 md:grid-cols-12 gap-6 items-center" style={{ opacity: 0 }}>
                 <div className="md:col-span-7 relative overflow-hidden bg-white aspect-[16/10] flex items-center justify-center border border-neutral-100 hover:border-neutral-300 transition-colors duration-500 p-4 md:p-6">
                   <FlowDiagram
                     nodes={moMoneyNodes}
@@ -601,7 +1330,6 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-            </RevealOnScroll>
           </div>
         </div>
       </section>
@@ -612,11 +1340,12 @@ export default function Home() {
          III. ITER — The Journey (Experience)
          ═══════════════════════════════════════════════════════════════ */}
       <section
+        ref={iterRef}
         id="iter"
         className="relative py-32 md:py-48 px-8 md:px-16 lg:px-24"
       >
         {/* 3D computer — positioned right, elevated like the hero statue */}
-        <div className="absolute top-0 right-0 bottom-0 w-full md:w-[55%] flex items-start justify-center pointer-events-none" style={{ paddingTop: '4rem' }}>
+        <div className="section-model absolute top-0 right-0 bottom-0 w-full md:w-[55%] flex items-start justify-center pointer-events-none" style={{ paddingTop: '4rem', opacity: 0 }}>
           <div className="w-[70%] h-[80%] max-h-[600px]">
             <JourneyComputer />
           </div>
@@ -635,15 +1364,19 @@ export default function Home() {
 
           {/* Experience timeline */}
           <div className="relative">
-            {/* Vertical timeline line */}
-            <div className="absolute left-0 md:left-[8.33%] top-0 bottom-0 w-px bg-neutral-200 hidden md:block" />
+            {/* Vertical timeline line — GSAP scrubs scaleY */}
+            <div
+              ref={timelineLineRef}
+              className="absolute left-0 md:left-[8.33%] top-0 bottom-0 w-px bg-neutral-200 hidden md:block origin-top"
+              style={{ transform: "scaleY(0)" }}
+            />
 
             <div className="space-y-16 md:space-y-20">
               {/* Experience 1 */}
               <RevealOnScroll>
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-4">
                   <div className="md:col-span-1 flex items-start justify-center relative">
-                    <div className="w-2 h-2 rounded-full bg-neutral-900 mt-2 hidden md:block relative z-10" />
+                    <div className="timeline-dot w-2 h-2 rounded-full bg-neutral-900 mt-2 hidden md:block relative z-10" />
                   </div>
                   <div className="md:col-span-3">
                     <span className="font-mono text-[0.65rem] tracking-[0.3em] uppercase text-neutral-400">
@@ -669,7 +1402,7 @@ export default function Home() {
               <RevealOnScroll delay={0.1}>
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-4">
                   <div className="md:col-span-1 flex items-start justify-center relative">
-                    <div className="w-2 h-2 rounded-full bg-neutral-300 mt-2 hidden md:block relative z-10" />
+                    <div className="timeline-dot w-2 h-2 rounded-full bg-neutral-300 mt-2 hidden md:block relative z-10" />
                   </div>
                   <div className="md:col-span-3">
                     <span className="font-mono text-[0.65rem] tracking-[0.3em] uppercase text-neutral-400">
@@ -681,7 +1414,7 @@ export default function Home() {
                       SDE Intern
                     </h3>
                     <p className="text-sm font-mono text-[var(--accent)] tracking-wide">
-                      Office Banao
+                      WPC
                     </p>
                     <p className="text-sm text-neutral-400 leading-relaxed font-mono pt-2 max-w-lg">
                       Developed the frontend architecture for a real-estate startup,
@@ -695,7 +1428,7 @@ export default function Home() {
               <RevealOnScroll delay={0.2}>
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-4">
                   <div className="md:col-span-1 flex items-start justify-center relative">
-                    <div className="w-2 h-2 rounded-full bg-neutral-300 mt-2 hidden md:block relative z-10" />
+                    <div className="timeline-dot w-2 h-2 rounded-full bg-neutral-300 mt-2 hidden md:block relative z-10" />
                   </div>
                   <div className="md:col-span-3">
                     <span className="font-mono text-[0.65rem] tracking-[0.3em] uppercase text-neutral-400">
@@ -731,7 +1464,7 @@ export default function Home() {
         className="relative py-32 md:py-48 px-8 md:px-16 lg:px-24"
       >
         {/* 3D redbull — positioned right, mirroring the Journey section */}
-        <div className="absolute top-0 right-0 bottom-0 w-full md:w-[45%] flex items-start justify-center pointer-events-none" style={{ paddingTop: '6rem' }}>
+        <div className="section-model absolute top-0 right-0 bottom-0 w-full md:w-[45%] flex items-start justify-center pointer-events-none" style={{ paddingTop: '6rem', opacity: 0 }}>
           <div className="w-[50%] h-[55%] max-h-[380px]">
             <CraftRedbull />
           </div>
@@ -748,10 +1481,8 @@ export default function Home() {
             </RevealOnScroll>
           </div>
 
-          {/* Design gallery */}
-          <RevealOnScroll delay={0.25}>
-            <DesignGallery />
-          </RevealOnScroll>
+          {/* Design gallery — GSAP handles per-card reveals, no wrapper needed */}
+          <DesignGallery />
         </div>
       </section>
 
@@ -765,7 +1496,7 @@ export default function Home() {
         className="relative py-32 md:py-48 px-8 md:px-16 lg:px-24"
       >
         {/* 3D Helmet — positioned right, contained to heading area */}
-        <div className="absolute top-0 right-0 w-full md:w-[45%] flex items-start justify-center pointer-events-none" style={{ paddingTop: '6rem', height: '480px' }}>
+        <div className="section-model absolute top-0 right-0 w-full md:w-[45%] flex items-start justify-center pointer-events-none" style={{ paddingTop: '6rem', height: '480px', opacity: 0 }}>
           <div className="w-[50%] h-[80%] max-h-[380px]">
             <PabulumHelmet />
           </div>
@@ -813,7 +1544,7 @@ export default function Home() {
                     coverUrl: "/book-cover/The Empusium by Olga Tokarczuk.jpg",
                   },
                 ].map((book, i) => (
-                  <RevealOnScroll key={book.title} delay={i * 0.1}>
+                  <div key={book.title} className="book-card-reveal" style={{ opacity: 0 }}>
                     <BookCard
                       title={book.title}
                       author={book.author}
@@ -821,7 +1552,7 @@ export default function Home() {
                       coverUrl={book.coverUrl}
                       index={i}
                     />
-                  </RevealOnScroll>
+                  </div>
                 ))}
               </div>
             </div>
@@ -870,7 +1601,7 @@ export default function Home() {
                     spotifyUrl: "https://open.spotify.com/track/5EVaeRCaBAOdbsChFHOiS4",
                   },
                 ].map((item, i) => (
-                  <RevealOnScroll key={item.album} delay={i * 0.1}>
+                  <div key={item.album} className="music-card-reveal" style={{ opacity: 0 }}>
                     <MusicCard
                       album={item.album}
                       artist={item.artist}
@@ -880,7 +1611,7 @@ export default function Home() {
                       spotifyUrl={item.spotifyUrl}
                       index={i}
                     />
-                  </RevealOnScroll>
+                  </div>
                 ))}
               </div>
             </div>
@@ -891,10 +1622,8 @@ export default function Home() {
       {/* ── Marquee ── */}
       <MarqueeStrip
         words={[
-          "Open to Collaborations",
-          "Let\u2019s Build Something",
-          "Available for Projects",
-          "Reach Out",
+          "aedificare",
+          "let's build",
         ]}
         reverse
         className="py-6 border-y border-neutral-100"
@@ -905,10 +1634,10 @@ export default function Home() {
          ═══════════════════════════════════════════════════════════════ */}
       <section
         id="nexus"
-        className="relative py-32 md:py-48 px-8 md:px-16 lg:px-24"
+        className="relative pt-32 md:pt-48 pb-16 md:pb-24 px-8 md:px-16 lg:px-24"
       >
         {/* 3D Dog — positioned right, mirroring other section models */}
-        <div className="absolute top-0 right-0 bottom-0 w-full md:w-[50%] flex items-start justify-center pointer-events-none" style={{ paddingTop: '1rem' }}>
+        <div className="section-model absolute top-0 right-0 bottom-0 w-full md:w-[50%] flex items-start justify-center pointer-events-none" style={{ paddingTop: '1rem', opacity: 0 }}>
           <div className="w-[75%] h-[65%] max-h-[480px]">
             <NexusDog />
           </div>
@@ -927,7 +1656,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="md:max-w-[50%] space-y-10 pt-24 md:pt-32">
+          <div className="md:max-w-[50%] space-y-10 pt-12 md:pt-16">
               <RevealOnScroll delay={0.15}>
                 <p className="text-base leading-relaxed text-neutral-400 max-w-md font-mono">
                   I love to sleep and I love dogs too :p
@@ -941,19 +1670,19 @@ export default function Home() {
                 <div className="flex items-center gap-6 pt-4">
                   <div className="w-12 h-px bg-neutral-300" />
                   <MagneticLink
-                    href="mailto:vedant@example.com"
+                    href="mailto:02davinci01@gmail.com"
                     className="font-mono text-[0.55rem] tracking-[0.2em] uppercase text-neutral-400 hover:text-neutral-900 transition-colors duration-300"
                   >
                     Email
                   </MagneticLink>
                   <MagneticLink
-                    href="https://github.com/vedant-nagwanshi"
+                    href="https://github.com/02-davinci-01"
                     className="font-mono text-[0.55rem] tracking-[0.2em] uppercase text-neutral-400 hover:text-neutral-900 transition-colors duration-300"
                   >
                     GitHub
                   </MagneticLink>
                   <MagneticLink
-                    href="https://linkedin.com/in/vedant-nagwanshi"
+                    href="https://in.linkedin.com/in/vedant-nagwanshi"
                     className="font-mono text-[0.55rem] tracking-[0.2em] uppercase text-neutral-400 hover:text-neutral-900 transition-colors duration-300"
                   >
                     LinkedIn
@@ -968,46 +1697,58 @@ export default function Home() {
          DIVINE HERMIT — Dostoevsky closing piece (final viewport)
          ═══════════════════════════════════════════════════════════════ */}
       <section
+        ref={closingRef}
         id="closing"
-        className="relative flex flex-col justify-end overflow-hidden"
+        className="relative flex flex-col justify-end overflow-clip"
         style={{ minHeight: '100vh' }}
       >
-        {/* 3D Bust — detached from text, positioned to section directly */}
+        {/* Static centering wrapper — never touched by GSAP */}
         <div
-          className="absolute z-10 left-1/2 bottom-0 pointer-events-auto"
+          className="absolute z-10 left-1/2 bottom-0"
           style={{
             width: '60vw',
             height: '100vh',
             transform: 'translateX(-50%) translateY(calc(5% - 30px))',
+            pointerEvents: 'none',
           }}
-          onMouseEnter={dostoevskyHover.onEnter}
-          onMouseLeave={dostoevskyHover.onLeave}
         >
-          <DostoevskyBust hovered={dostoevskyHover.hovered} />
+          {/* GSAP-animated inner wrapper — no CSS transform to conflict */}
+          <div
+            ref={bustWrapperRef}
+            className="w-full h-full"
+            style={{ opacity: 0, pointerEvents: closingHoverable ? 'auto' : 'none' }}
+            onMouseEnter={closingHoverable ? dostoevskyHover.onEnter : undefined}
+            onMouseLeave={closingHoverable ? dostoevskyHover.onLeave : undefined}
+          >
+            <DostoevskyBust hovered={dostoevskyHover.hovered} />
+          </div>
         </div>
 
-        {/* DIVINE HERMIT text — independent of 3D render */}
-        <motion.div
-          className="w-full px-6 md:px-12 lg:px-20 pb-0 relative z-20 pointer-events-none"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.9, ease: [0.23, 1, 0.32, 1] }}
-        >
+        {/* DIVINE HERMIT text — animated by GSAP Batch C */}
+        <div className="w-full px-6 md:px-12 lg:px-20 pb-0 relative z-20 pointer-events-none">
           <div className="flex items-end justify-between select-none">
-            <span className="font-mono text-[clamp(3rem,8vw,7rem)] font-black tracking-tighter text-neutral-900 leading-none">
+            <span
+              ref={divineRef}
+              className="font-mono text-[clamp(3rem,8vw,7rem)] font-black tracking-tighter text-neutral-900 leading-none"
+              style={{ opacity: 0 }}
+            >
               divine
             </span>
 
             {/* Spacer — holds the gap where the statue visually sits */}
             <div className="flex-shrink-0 w-[160px] md:w-[220px] lg:w-[280px]" />
 
-            <span className="font-mono text-[clamp(3rem,8vw,7rem)] font-black tracking-tighter text-neutral-900 leading-none">
+            <span
+              ref={hermitRef}
+              className="font-mono text-[clamp(3rem,8vw,7rem)] font-black tracking-tighter text-neutral-900 leading-none"
+              style={{ opacity: 0 }}
+            >
               hermit
             </span>
           </div>
-        </motion.div>
+        </div>
       </section>
-    </main>
+      </main>
+    </>
   );
 }

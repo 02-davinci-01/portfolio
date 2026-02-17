@@ -82,8 +82,11 @@ const NexusDog = memo(function NexusDog() {
         />
       </div>
 
+      {/* Floating shadow */}
+      <div className="model-shadow" style={{ zIndex: 0 }} />
+
       {isNearViewport ? (
-        /* @ts-expect-error model-viewer is a web component with custom attributes */
+        <div className={prefersReducedMotion ? '' : 'model-float-inner'} style={{ width: '100%', height: '100%' }}>
         <model-viewer
           ref={(el: HTMLElement | null) => {
             modelRef.current = el;
@@ -115,7 +118,10 @@ const NexusDog = memo(function NexusDog() {
             zIndex: 15,
             pointerEvents: "none" as const,
           }}
-        />
+        >
+          <span slot="progress-bar" />
+        </model-viewer>
+        </div>
       ) : (
         <div
           className="w-full h-full bg-neutral-50/30 animate-pulse rounded-lg"

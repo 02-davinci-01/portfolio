@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { useScrollLock } from "@/app/hooks/useScrollLock";
 
 /* ── Design data ── */
 interface DesignItem {
@@ -107,7 +108,7 @@ const DesignCard = memo(function DesignCard({
 
         {/* Click prompt — appears on hover */}
         <div className="design-card__prompt absolute top-1/2 left-1/2">
-          <div className="w-10 h-10 rounded-full border border-white/40 flex items-center justify-center backdrop-blur-sm">
+          <div className="design-card__prompt-circle">
             <svg
               width="14"
               height="14"
@@ -152,40 +153,23 @@ function DesignModal({
     return () => document.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  // Lock scroll without removing scrollbar — prevents layout jerk
-  useEffect(() => {
-    const scrollY = window.scrollY;
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.left = "0";
-    document.body.style.right = "0";
-    document.body.classList.add("design-modal-open");
-    return () => {
-      const savedY = parseInt(document.body.style.top || "0", 10) * -1;
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.left = "";
-      document.body.style.right = "";
-      document.body.classList.remove("design-modal-open");
-      window.scrollTo({ top: savedY, behavior: "instant" });
-    };
-  }, []);
+  // Lock scroll — overflow:hidden on <html> preserves scroll position,
+  // avoids Lenis desync that caused scroll-to-top on close.
+  useScrollLock(true, "design-modal-open");
 
   return (
     <motion.div
       className="design-modal__backdrop"
       initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3, ease: easeOut }}
+      animate={{ opacity: 1, transition: { duration: 0.35, ease: easeOut } }}
+      exit={{ opacity: 0, transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] } }}
       onClick={onClose}
     >
       <motion.div
         className="design-modal__container"
         initial={{ opacity: 0, y: 40, scale: 0.92 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 30, scale: 0.95 }}
-        transition={{ duration: 0.5, ease: easeOut }}
+        animate={{ opacity: 1, y: 0, scale: 1, transition: { duration: 0.45, ease: easeOut } }}
+        exit={{ opacity: 0, y: 8, scale: 0.99, transition: { duration: 0.45, ease: [0.4, 0, 0.2, 1] } }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}

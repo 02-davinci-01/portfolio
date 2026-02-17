@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
+import { useScrollLock } from "@/app/hooks/useScrollLock";
 
 /* ── Shared Spotify iFrame API loader ── */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -85,31 +86,18 @@ const MusicCard = memo(function MusicCard({
     };
   }, []);
 
-  // Lock scroll without removing scrollbar — prevents layout jerk
+  // Lock scroll — overflow:hidden on <html> preserves scroll position,
+  // avoids Lenis desync that caused scroll-to-top on close.
+  useScrollLock(modalOpen, "music-modal-open");
+
+  // Close on Escape
   useEffect(() => {
     if (!modalOpen) return;
-    const scrollY = window.scrollY;
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.left = "0";
-    document.body.style.right = "0";
-    document.body.classList.add("music-modal-open");
-
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setModalOpen(false);
     };
     document.addEventListener("keydown", onKey);
-
-    return () => {
-      const savedY = parseInt(document.body.style.top || "0", 10) * -1;
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.left = "";
-      document.body.style.right = "";
-      document.body.classList.remove("music-modal-open");
-      document.removeEventListener("keydown", onKey);
-      window.scrollTo({ top: savedY, behavior: "instant" });
-    };
+    return () => document.removeEventListener("keydown", onKey);
   }, [modalOpen]);
 
   // Initialize the Spotify controller when we first need it
@@ -234,26 +222,24 @@ const MusicCard = memo(function MusicCard({
           <motion.div
             className="fixed inset-0 z-50 flex items-center justify-center px-6"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3, ease: easeOut }}
+            animate={{ opacity: 1, transition: { duration: 0.35, ease: easeOut } }}
+            exit={{ opacity: 0, transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] } }}
           >
             {/* Backdrop */}
             <motion.div
               className="absolute inset-0 bg-black/40 backdrop-blur-sm"
               onClick={handleClose}
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { duration: 0.35, ease: easeOut } }}
+              exit={{ opacity: 0, transition: { duration: 0.55, ease: [0.4, 0, 0.2, 1] } }}
             />
 
             {/* Dialog */}
             <motion.div
               className="music-player relative"
               initial={{ opacity: 0, y: 20, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.98 }}
-              transition={{ duration: 0.4, ease: easeOut }}
+              animate={{ opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: easeOut } }}
+              exit={{ opacity: 0, y: 8, scale: 0.99, transition: { duration: 0.45, ease: [0.4, 0, 0.2, 1] } }}
             >
               {/* Close */}
               <button

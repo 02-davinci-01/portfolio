@@ -25,7 +25,7 @@
 
 ---
 
-## Batch A — Hero Exit + Scroll Indicator Fade
+## Batch A — Hero Exit + Scroll Indicator Fade ✅
 
 > First thing you scroll past. Immediately validates the investment.
 
@@ -42,12 +42,12 @@
 
 **Litmus:** Guides eye from hero to next section naturally. Noticeable if removed. 60fps.
 
-- [ ] Add `ref` to hero text wrapper
-- [ ] Add `ref` to statue wrapper
-- [ ] Create `useGSAP` block with hero parallax-out ScrollTrigger
-- [ ] Create statue fade ScrollTrigger (subtle `opacity: 0`, `scale: 0.97`)
-- [ ] Test on desktop + mobile
-- [ ] Verify StatueViewer hover still works during scroll
+- [x] Add `ref` to hero text wrapper
+- [x] Add `ref` to statue wrapper
+- [x] Create `useGSAP` block with hero parallax-out ScrollTrigger
+- [x] Create statue fade ScrollTrigger (subtle `opacity: 0`, `scale: 0.97`)
+- [x] Test on desktop + mobile
+- [x] Verify StatueViewer hover still works during scroll
 
 ### A2. Scroll indicator exit
 
@@ -61,13 +61,13 @@
 
 **Litmus:** Functional polish. Did its job, now it vanishes. Respects attention.
 
-- [ ] Add `ref` to scroll indicator
-- [ ] Add ScrollTrigger for quick fade-out
-- [ ] Remove `RevealOnScroll` wrapper from scroll indicator (now managed by GSAP)
+- [x] Add `ref` to scroll indicator
+- [x] Add ScrollTrigger for quick fade-out
+- [x] Remove `RevealOnScroll` wrapper from scroll indicator (now managed by GSAP)
 
 ---
 
-## Batch B — Timeline Line Draw + Divider Lines
+## Batch B — Timeline Line Draw + Divider Lines ✅
 
 > The "wow" moment plus structural polish.
 
@@ -84,12 +84,12 @@
 
 **Litmus:** Visualises progression through career as you scroll. Impossible with Framer Motion. The signature GSAP effect.
 
-- [ ] Add class/ref to timeline line element
-- [ ] Add class/ref to each timeline dot
-- [ ] Create `useGSAP` block for line scaleY scrub
-- [ ] Create staggered dot ScrollTriggers
-- [ ] Test scroll speed sensitivity — `scrub: 0.3` should feel natural
-- [ ] Verify mobile (line is `hidden md:block` — skip on mobile)
+- [x] Add class/ref to timeline line element
+- [x] Add class/ref to each timeline dot
+- [x] Create `useGSAP` block for line scaleY scrub
+- [x] Create staggered dot ScrollTriggers
+- [x] Test scroll speed sensitivity — `scrub: 0.3` should feel natural
+- [x] Verify mobile (line is `hidden md:block` — skip on mobile)
 
 ### B2. Divider lines grow from center
 
@@ -103,13 +103,13 @@
 
 **Litmus:** Structural elements feel alive. Breath between sections becomes a micro-moment. Notice on the 3rd visit.
 
-- [ ] Add GSAP batch animation for all `.section-divider` elements
-- [ ] Verify all 3 dividers animate independently
-- [ ] Test timing feels right (not too slow, not too snappy)
+- [x] Add GSAP batch animation for all `.section-divider` elements
+- [x] Verify all 3 dividers animate independently
+- [x] Test timing feels right (not too slow, not too snappy)
 
 ---
 
-## Batch C — Divine Hermit Pinned Reveal
+## Batch C — Divine Hermit Pinned Reveal ✅
 
 > The showpiece. The page freezes, something choreographed happens, then releases.
 
@@ -135,17 +135,17 @@
 
 **Litmus:** Cinematic closing. Rewards scrolling all the way. Good on the 10th visit.
 
-- [ ] Add `ref`s to bust wrapper, "divine" span, "hermit" span
-- [ ] Replace `motion.div whileInView` with GSAP timeline
-- [ ] Create pinned ScrollTrigger with timeline
-- [ ] Test pin/unpin behavior (no layout jumps)
-- [ ] Test with navbar hide logic (navbar should hide at closing)
-- [ ] Test mobile — consider simpler non-pinned version
-- [ ] Verify Dostoevsky hover-zoom still works after unpin
+- [x] Add `ref`s to bust wrapper, "divine" span, "hermit" span
+- [x] Replace `motion.div whileInView` with GSAP timeline
+- [x] Create pinned ScrollTrigger with timeline
+- [x] Test pin/unpin behavior (no layout jumps)
+- [x] Test with navbar hide logic (navbar should hide at closing)
+- [x] Test mobile — consider simpler non-pinned version
+- [x] Verify Dostoevsky hover-zoom still works after unpin
 
 ---
 
-## Batch D — Project & Afflatus Card Stagger
+## Batch D — Project & Afflatus Card Stagger ✓
 
 > Polish pass on middle sections. Rhythm and directionality.
 
@@ -155,14 +155,14 @@
 
 **Spec:**
 - Target: project card containers (the `.group.grid` elements inside Opera)
-- Effect: `y: 30`, `opacity: 0`, stagger `0.12`
+- Effect: `y: 24`, `opacity: 0`, individual ScrollTrigger per card
 - ScrollTrigger per card: `start: "top 88%"`, `toggleActions: "play none none none"`
 - SVG edge draw-in: `strokeDashoffset` animation after card reveal (stretch goal)
 
-- [ ] Add class to project card wrappers
-- [ ] Replace `<RevealOnScroll>` with GSAP stagger
+- [x] Add class to project card wrappers
+- [x] Replace `<RevealOnScroll>` with GSAP stagger
 - [ ] Optional: SVG edge sequential draw-in
-- [ ] Verify alternating layout (left/right) still works
+- [x] Verify alternating layout (left/right) still works
 
 ### D2. Book/Music cards — directional rhythm
 
@@ -170,13 +170,27 @@
 
 **Spec:**
 - Target: book cards (left column), music cards (right column)
-- Books: `x: -20, opacity: 0`, stagger `0.1`
-- Music: `x: 20, opacity: 0`, stagger `0.1`
-- ScrollTrigger: `start: "top 85%"`, one-shot
+- Books: `x: -20, opacity: 0`, individual ScrollTrigger
+- Music: `x: 20, opacity: 0`, individual ScrollTrigger
+- ScrollTrigger: `start: "top 88%"`, one-shot
 
-- [ ] Add directional classes or refs to book/music card wrappers
-- [ ] Replace `<RevealOnScroll>` with GSAP directional reveals
-- [ ] Verify stagger rhythm feels natural
+- [x] Add directional classes or refs to book/music card wrappers
+- [x] Replace `<RevealOnScroll>` with GSAP directional reveals
+- [x] Verify stagger rhythm feels natural
+
+### D3. Section 3D models — scroll entrance
+
+**What:** Each section’s 3D model (da Vinci, computer, redbull, helmet, dog) fades in + drifts up when its parent section enters the viewport. One-shot, not scrubbed.
+
+**Spec:**
+- Target: `.section-model` elements (outer wrappers of each 3D model)
+- Effect: `opacity: 0 → 1`, `y: 20 → 0`
+- ScrollTrigger: `trigger: closest section`, `start: "top 70%"`, one-shot
+- `prefers-reduced-motion`: show immediately
+
+- [x] Add `section-model` class + initial `opacity: 0` to all 5 model wrappers
+- [x] Create GSAP batch animation for `.section-model` elements
+- [x] Verify lazy-loading IO still triggers (wrapper in DOM, just transparent)
 
 ---
 
@@ -204,4 +218,4 @@
 
 ---
 
-*Last updated: 2026-02-17 — Phase 0 complete, Batch A next.*
+*Last updated: 2026-02-17 — Phases 0–C, Batch D complete. Post-implementation remaining.*

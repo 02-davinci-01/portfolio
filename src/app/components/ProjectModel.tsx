@@ -74,7 +74,6 @@ const ProjectModel = memo(function ProjectModel({
       onMouseLeave={onLeave}
     >
       {isNearViewport ? (
-        /* @ts-expect-error model-viewer is a web component with custom attributes */
         <model-viewer
           src={src}
           alt={alt}

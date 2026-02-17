@@ -82,7 +82,11 @@ const OperaDaVinci = memo(function OperaDaVinci() {
         />
       </div>
 
+      {/* Floating shadow */}
+      <div className="model-shadow" style={{ zIndex: 0 }} />
+
       {isNearViewport ? (
+        <div className={prefersReducedMotion ? '' : 'model-float-inner'} style={{ width: '100%', height: '100%' }}>
         <div
           style={{
             width: "100%",
@@ -91,7 +95,6 @@ const OperaDaVinci = memo(function OperaDaVinci() {
             WebkitMask: "radial-gradient(ellipse 55% 60% at 50% 45%, black 40%, transparent 75%)",
           }}
         >
-          {/* @ts-expect-error model-viewer is a web component with custom attributes */}
           <model-viewer
             ref={(el: HTMLElement | null) => {
               modelRef.current = el;
@@ -123,7 +126,10 @@ const OperaDaVinci = memo(function OperaDaVinci() {
               zIndex: 15,
               pointerEvents: "none" as const,
             }}
-          />
+          >
+            <span slot="progress-bar" />
+          </model-viewer>
+        </div>
         </div>
       ) : (
         <div

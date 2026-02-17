@@ -171,7 +171,6 @@ const StatueViewer = memo(function StatueViewer({ hovered = false }: StatueViewe
 
       {/* 3D model — no camera-controls so pointer doesn't interfere */}
       {isNearViewport ? (
-        /* @ts-expect-error model-viewer web component */
         <model-viewer
           ref={(el: HTMLElement | null) => {
             modelRef.current = el;
@@ -204,7 +203,9 @@ const StatueViewer = memo(function StatueViewer({ hovered = false }: StatueViewe
             cursor: "none",
             pointerEvents: "none" as const,
           }}
-        />
+        >
+          <span slot="progress-bar" />
+        </model-viewer>
       ) : (
         <div className="w-full h-full bg-neutral-50/50 animate-pulse rounded-lg" aria-label="Loading 3D statue…" />
       )}

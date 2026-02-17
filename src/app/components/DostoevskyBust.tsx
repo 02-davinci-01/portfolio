@@ -91,7 +91,7 @@ const DostoevskyBust = memo(function DostoevskyBust({
   const defaultTarget = "auto auto auto";
   const defaultFov = "30deg";
   // Zoom: swing clockwise to face-on, close-up intimate framing
-  const zoomedOrbit = "49deg 90deg 5%";
+  const zoomedOrbit = "53deg 90deg 5%";
   const zoomedFov = "90deg";
   const isZoomed = hovered && !prefersReducedMotion;
   const dialogOpen = hovered;
@@ -105,7 +105,7 @@ const DostoevskyBust = memo(function DostoevskyBust({
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 2 }}>
         {/* Outer ambient glow — warm gold */}
         <div
-          className="absolute rounded-full transition-all duration-[1400ms] ease-out animate-halo-pulse"
+          className="absolute rounded-full transition-[width,filter,background] duration-[1400ms] ease-out animate-halo-pulse"
           style={{
             width: hovered ? "120%" : "90%",
             aspectRatio: "1",
@@ -117,7 +117,7 @@ const DostoevskyBust = memo(function DostoevskyBust({
         />
         {/* Core glow — brighter gold */}
         <div
-          className="absolute rounded-full transition-all duration-[1000ms] ease-out animate-halo-pulse-inner"
+          className="absolute rounded-full transition-[width,filter,background] duration-[1000ms] ease-out animate-halo-pulse-inner"
           style={{
             width: hovered ? "75%" : "60%",
             aspectRatio: "1",
@@ -129,7 +129,7 @@ const DostoevskyBust = memo(function DostoevskyBust({
         />
         {/* Ground shadow — stays dark for grounding */}
         <div
-          className="absolute transition-all duration-[1200ms] ease-out"
+          className="absolute transition-[width,height,filter,background] duration-[1200ms] ease-out"
           style={{
             bottom: '8%',
             width: hovered ? '65%' : '50%',
@@ -143,7 +143,7 @@ const DostoevskyBust = memo(function DostoevskyBust({
         />
         {/* Solid ring — visible on white, pulses gently */}
         <div
-          className="absolute rounded-full transition-all duration-[1200ms] ease-out animate-halo-pulse"
+          className="absolute rounded-full transition-[width] duration-[1200ms] ease-out animate-halo-pulse"
           style={{
             width: hovered ? '50%' : '40%',
             aspectRatio: '1',
@@ -181,7 +181,7 @@ const DostoevskyBust = memo(function DostoevskyBust({
             >
               <div className="terminal-dialog__body">
                 <p className="terminal-dialog__line">
-                  &ldquo;A man who overcomes suffering and fear will become god.&rdquo;
+                  &ldquo;He who overcomes suffering and fear will become god.&rdquo;
                 </p>
 
                 <div className="terminal-dialog__divider" />
@@ -198,7 +198,6 @@ const DostoevskyBust = memo(function DostoevskyBust({
       {/* 3D model — stone textures applied programmatically on load */}
       {/* 3D model — no camera-controls so pointer doesn't interfere */}
       {isNearViewport ? (
-        /* @ts-expect-error model-viewer web component */
         <model-viewer
           ref={(el: HTMLElement | null) => {
             modelRef.current = el;
@@ -231,7 +230,9 @@ const DostoevskyBust = memo(function DostoevskyBust({
             cursor: "none",
             pointerEvents: "none" as const,
           }}
-        />
+        >
+          <span slot="progress-bar" />
+        </model-viewer>
       ) : (
         <div className="w-full h-full bg-neutral-50/50 animate-pulse rounded-lg" aria-label="Loading 3D statue…" />
       )}

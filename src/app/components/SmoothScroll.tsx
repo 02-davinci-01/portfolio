@@ -35,6 +35,9 @@ export default function SmoothScroll({
 
     lenisRef.current = lenis;
 
+    // Expose globally so modals / overlays can call stop() / start()
+    (window as unknown as Record<string, unknown>).__lenis = lenis;
+
     // Sync Lenis → ScrollTrigger on every scroll event
     lenis.on("scroll", ScrollTrigger.update);
 
@@ -47,6 +50,7 @@ export default function SmoothScroll({
       gsap.ticker.remove(tickerCallback);
       lenis.destroy();
       lenisRef.current = null;
+      delete (window as unknown as Record<string, unknown>).__lenis;
     };
   }, []);
 
