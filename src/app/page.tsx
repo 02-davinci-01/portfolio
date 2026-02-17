@@ -392,6 +392,7 @@ export default function Home() {
 
       mm.add(
         {
+          all: "all",
           desktop: "(min-width: 768px)",
           reduced: "(prefers-reduced-motion: reduce)",
         },
@@ -401,7 +402,7 @@ export default function Home() {
           if (reduced) return;
 
           // B1: Timeline line — scaleY from 0 → 1, scrubbed to scroll
-          if (desktop && timelineLineRef.current) {
+          if (timelineLineRef.current) {
             gsap.fromTo(
               timelineLineRef.current,
               { scaleY: 0 },
@@ -1440,18 +1441,18 @@ export default function Home() {
             {/* Vertical timeline line — GSAP scrubs scaleY */}
             <div
               ref={timelineLineRef}
-              className="absolute left-0 md:left-[8.33%] top-0 bottom-0 w-px bg-neutral-200 hidden md:block origin-top"
+              className="absolute left-0 md:left-[8.33%] top-0 bottom-0 w-px bg-neutral-200 origin-top"
               style={{ transform: "scaleY(0)" }}
             />
 
             <div className="space-y-16 md:space-y-20">
               {/* Experience 1 */}
               <RevealOnScroll>
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-4">
-                  <div className="md:col-span-1 flex items-start justify-center relative">
-                    <div className="timeline-dot w-2 h-2 rounded-full bg-neutral-900 mt-2 hidden md:block relative z-10" />
+                <div className="relative pl-6 md:pl-0 md:grid md:grid-cols-12 md:gap-4">
+                  <div className="absolute left-[-4px] top-[6px] md:static md:col-span-1 md:flex md:items-start md:justify-center md:relative">
+                    <div className="timeline-dot w-2 h-2 rounded-full bg-neutral-900 md:mt-2 relative z-10" />
                   </div>
-                  <div className="md:col-span-3">
+                  <div className="md:col-span-3 mb-2 md:mb-0">
                     <span className="font-mono text-[0.65rem] tracking-[0.3em] uppercase text-neutral-400">
                       2025 — Present
                     </span>
@@ -1473,11 +1474,11 @@ export default function Home() {
 
               {/* Experience 2 */}
               <RevealOnScroll delay={0.1}>
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-4">
-                  <div className="md:col-span-1 flex items-start justify-center relative">
-                    <div className="timeline-dot w-2 h-2 rounded-full bg-neutral-300 mt-2 hidden md:block relative z-10" />
+                <div className="relative pl-6 md:pl-0 md:grid md:grid-cols-12 md:gap-4">
+                  <div className="absolute left-[-4px] top-[6px] md:static md:col-span-1 md:flex md:items-start md:justify-center md:relative">
+                    <div className="timeline-dot w-2 h-2 rounded-full bg-neutral-300 md:mt-2 relative z-10" />
                   </div>
-                  <div className="md:col-span-3">
+                  <div className="md:col-span-3 mb-2 md:mb-0">
                     <span className="font-mono text-[0.65rem] tracking-[0.3em] uppercase text-neutral-400">
                       May — Jul 2025
                     </span>
@@ -1499,11 +1500,11 @@ export default function Home() {
 
               {/* Experience 3 */}
               <RevealOnScroll delay={0.2}>
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-4">
-                  <div className="md:col-span-1 flex items-start justify-center relative">
-                    <div className="timeline-dot w-2 h-2 rounded-full bg-neutral-300 mt-2 hidden md:block relative z-10" />
+                <div className="relative pl-6 md:pl-0 md:grid md:grid-cols-12 md:gap-4">
+                  <div className="absolute left-[-4px] top-[6px] md:static md:col-span-1 md:flex md:items-start md:justify-center md:relative">
+                    <div className="timeline-dot w-2 h-2 rounded-full bg-neutral-300 md:mt-2 relative z-10" />
                   </div>
-                  <div className="md:col-span-3">
+                  <div className="md:col-span-3 mb-2 md:mb-0">
                     <span className="font-mono text-[0.65rem] tracking-[0.3em] uppercase text-neutral-400">
                       2023 — Present
                     </span>
