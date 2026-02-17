@@ -1443,7 +1443,7 @@ export default function Home() {
                   </div>
                   <div className="md:col-span-3">
                     <span className="font-mono text-[0.65rem] tracking-[0.3em] uppercase text-neutral-400">
-                      May — Jul 2024
+                      May — Jul 2025
                     </span>
                   </div>
                   <div className="md:col-span-7 space-y-2">
