@@ -91,8 +91,8 @@ const DostoevskyBust = memo(function DostoevskyBust({
   const defaultTarget = "auto auto auto";
   const defaultFov = "30deg";
   // Zoom: swing clockwise to face-on, close-up intimate framing
-  const zoomedOrbit = "50deg 90deg 170%";
-  const zoomedFov = "89deg";
+  const zoomedOrbit = "50deg 90deg 130%";
+  const zoomedFov = "90deg";
   const isZoomed = hovered && !prefersReducedMotion;
   const dialogOpen = hovered;
 
