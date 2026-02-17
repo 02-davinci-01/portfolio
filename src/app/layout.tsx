@@ -36,16 +36,23 @@ export default function RootLayout({
 self.ModelViewerElement.meshoptDecoderLocation = 'https://cdn.jsdelivr.net/npm/meshoptimizer/meshopt_decoder.js';`,
           }}
         />
-        {/* Preload critical 3D assets — browser fetches early without blocking render */}
+        {/* Preload critical 3D assets — hero statue + environment map */}
         <link
           rel="preload"
-          href="/personal_computer_pbr.glb"
+          href="/hl._alexius.glb"
           as="fetch"
           crossOrigin="anonymous"
         />
         <link
           rel="preload"
           href="/environment.hdr"
+          as="fetch"
+          crossOrigin="anonymous"
+        />
+        {/* Prefetch below-fold GLB — low priority, fetched when idle */}
+        <link
+          rel="prefetch"
+          href="/personal_computer_pbr.glb"
           as="fetch"
           crossOrigin="anonymous"
         />

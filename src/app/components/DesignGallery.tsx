@@ -15,42 +15,42 @@ interface DesignItem {
 
 const designs: DesignItem[] = [
   {
-    src: "/designs/god's_theme_edited.png",
+    src: "/designs/god's_theme_edited.webp",
     title: "God's Theme",
     year: "2025",
     description:
       "\"I try hard as I can to understand life through god\" — Ayrton Senna",
   },
   {
-    src: "/designs/drop_fruit.png",
+    src: "/designs/drop_fruit.webp",
     title: "Drop Fruit",
     year: "2024",
     description:
       "After one of my favorite films of all time. Rock paper scissors with a pond.",
   },
   {
-    src: "/designs/AEDIS.png",
+    src: "/designs/AEDIS.webp",
     title: "AEDIS",
     year: "2023",
     description:
       "A little temple made from scraps. A man can make his own rituals after all.",
   },
   {
-    src: "/designs/jesus_is_king.png",
+    src: "/designs/jesus_is_king.webp",
     title: "Jesus Is King",
     year: "2023",
     description:
       "One of my earliest works. Saw it in my dream :)",
   },
   {
-    src: "/designs/f_l_w_u.png",
+    src: "/designs/f_l_w_u.webp",
     title: "F.L.W.U.",
     year: "2025",
     description:
       "\"Mio Dio, mio Dio, perché mi hai abbandonato?\" — Ralph Fiennes, Conclave 2025",
   },
   {
-    src: "/designs/SADVILLAIN.png",
+    src: "/designs/SADVILLAIN.webp",
     title: "SADVILLAIN",
     year: "2023",
     description:
@@ -201,11 +201,15 @@ function DesignModal({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1, duration: 0.5, ease: easeOut }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={item.src}
             alt={item.title}
+            width={560}
+            height={560}
             className="design-modal__image"
+            sizes="(max-width: 768px) 100vw, 280px"
+            quality={85}
+            priority
           />
         </motion.div>
 

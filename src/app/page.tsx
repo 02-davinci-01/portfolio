@@ -947,8 +947,8 @@ export default function Home() {
                 ease: "power1.in",
                 scrollTrigger: {
                   trigger: section,
-                  start: "60% top",   // starts fading when 60% of section has passed viewport top
-                  end: "bottom top",  // fully dim by the time section leaves
+                  start: "bottom 50%", // starts fading when section bottom reaches viewport midpoint
+                  end: "bottom -10%",  // fully dim shortly after section leaves viewport
                   scrub: 0.3,
                 },
               }
@@ -1072,12 +1072,37 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Invisible right-half hover zone — covers entire right 50% of hero */}
+        {/* Invisible right-half hover zone — covers entire right 50% of hero.
+            onClick uses hide-and-peek: temporarily removes itself from hit-testing,
+            queries the element underneath, and clicks it if it’s a link. This lets
+            the Resume Granted <a> (z-10, behind the statue) receive clicks even
+            though this overlay sits above it at z-16. */}
         <div
           className="absolute top-0 right-0 bottom-0 hidden md:block"
           style={{ width: '50%', zIndex: 16 }}
           onMouseEnter={statueHover.onEnter}
           onMouseLeave={statueHover.onLeave}
+          onMouseMove={(e) => {
+            const el = e.currentTarget;
+            el.style.pointerEvents = 'none';
+            const below = document.elementFromPoint(e.clientX, e.clientY);
+            el.style.pointerEvents = '';
+            const btn = below instanceof HTMLButtonElement ? below : below?.closest('button');
+            const prev = (el as any).__lastHoverBtn as HTMLButtonElement | null;
+            if (btn !== prev) {
+              if (prev) prev.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+              if (btn) btn.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+              (el as any).__lastHoverBtn = btn ?? null;
+            }
+          }}
+          onClick={(e) => {
+            const el = e.currentTarget;
+            el.style.pointerEvents = 'none';
+            const below = document.elementFromPoint(e.clientX, e.clientY);
+            el.style.pointerEvents = '';
+            const btn = below instanceof HTMLButtonElement ? below : below?.closest('button');
+            if (btn) btn.click();
+          }}
         />
 
         {/* Hero text */}
@@ -1529,7 +1554,7 @@ export default function Home() {
                     title: "The Three-Body Problem",
                     author: "Cixin Liu",
                     note: "Currently reading it. If the universe is a dark forest how would you signal that you are a peaceful civilization?",
-                    coverUrl: "/book-cover/Death's End by Cixin Liu.jpg",
+                    coverUrl: "/book-cover/Death's End by Cixin Liu.webp",
                   },
                   {
                     title: "Memories, Dreams, Reflections",
@@ -1541,7 +1566,7 @@ export default function Home() {
                     title: "The Empusium",
                     author: "Olga Tokarczuk",
                     note: "A bit of a slow burn. On the relation of humans and nature, and the personification of exploitation. Slightly tedious.",
-                    coverUrl: "/book-cover/The Empusium by Olga Tokarczuk.jpg",
+                    coverUrl: "/book-cover/The Empusium by Olga Tokarczuk.webp",
                   },
                 ].map((book, i) => (
                   <div key={book.title} className="book-card-reveal" style={{ opacity: 0 }}>
@@ -1572,7 +1597,7 @@ export default function Home() {
                     album: "Velocity : Design : Comfort",
                     artist: "Sweet Trip",
                     track: "Dsco",
-                    coverUrl: "/album-art/velocity-design-comfort.jpg",
+                    coverUrl: "/album-art/velocity-design-comfort.webp",
                     spotifyTrackId: "1OKkG3vxEuBBwLw1gCqdNW",
                     spotifyUrl: "https://open.spotify.com/track/1OKkG3vxEuBBwLw1gCqdNW",
                   },
@@ -1580,7 +1605,7 @@ export default function Home() {
                     album: "Yeezus",
                     artist: "Kanye West",
                     track: "On Sight",
-                    coverUrl: "/album-art/yeezus.jpg",
+                    coverUrl: "/album-art/yeezus.webp",
                     spotifyTrackId: "1gqkRc9WtOpnGIqxf2Hvzr",
                     spotifyUrl: "https://open.spotify.com/track/1gqkRc9WtOpnGIqxf2Hvzr",
                   },
@@ -1588,7 +1613,7 @@ export default function Home() {
                     album: "Kid A",
                     artist: "Radiohead",
                     track: "Motion Picture Soundtrack",
-                    coverUrl: "/album-art/kid-a.jpg",
+                    coverUrl: "/album-art/kid-a.webp",
                     spotifyTrackId: "4SrRrB27n7fiRkQcPoKfpk",
                     spotifyUrl: "https://open.spotify.com/track/4SrRrB27n7fiRkQcPoKfpk",
                   },
@@ -1596,7 +1621,7 @@ export default function Home() {
                     album: "Avanti",
                     artist: "Alessandro Cortini",
                     track: "Avanti",
-                    coverUrl: "/album-art/avanti.jpg",
+                    coverUrl: "/album-art/avanti.webp",
                     spotifyTrackId: "5EVaeRCaBAOdbsChFHOiS4",
                     spotifyUrl: "https://open.spotify.com/track/5EVaeRCaBAOdbsChFHOiS4",
                   },

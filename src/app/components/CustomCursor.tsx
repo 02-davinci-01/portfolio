@@ -84,7 +84,9 @@ const CustomCursor = memo(function CustomCursor() {
 
     let interactiveEls = attachHoverListeners();
 
-    // Re-attach on DOM changes (e.g. modal open/close)
+    // Re-attach on DOM changes (e.g. modal open/close) — debounced to avoid
+    // thrashing on rapid mutations (scroll-triggered class changes, etc.)
+    let mutationTimer: ReturnType<typeof setTimeout> | null = null;
     const observer = new MutationObserver(() => {
       // If the hovered element was removed from the DOM, reset hover state
       if (hoveredElRef.current && !document.body.contains(hoveredElRef.current)) {
@@ -93,17 +95,21 @@ const CustomCursor = memo(function CustomCursor() {
         if (!isDownRef.current) targetScaleRef.current = 1.0;
         el.classList.remove("cursor-arrow--hovering");
       }
-      // Clean up old listeners
-      interactiveEls.forEach((el) => {
-        el.removeEventListener("mouseenter", onHoverStart);
-        el.removeEventListener("mouseleave", onHoverEnd);
-      });
-      interactiveEls = attachHoverListeners();
+      // Debounce re-attachment — DOM mutations batch within 150ms
+      if (mutationTimer) clearTimeout(mutationTimer);
+      mutationTimer = setTimeout(() => {
+        interactiveEls.forEach((el) => {
+          el.removeEventListener("mouseenter", onHoverStart);
+          el.removeEventListener("mouseleave", onHoverEnd);
+        });
+        interactiveEls = attachHoverListeners();
+      }, 150);
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
     return () => {
       cancelAnimationFrame(rafRef.current);
+      if (mutationTimer) clearTimeout(mutationTimer);
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mousedown", onMouseDown);
       document.removeEventListener("mouseup", onMouseUp);

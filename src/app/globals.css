@@ -36,7 +36,7 @@ body {
 }
 
 html {
-  scroll-behavior: smooth;
+  /* scroll-behavior handled by Lenis — native smooth-scroll disabled to avoid conflicts */
   overflow-y: scroll;
 }
 
@@ -81,7 +81,8 @@ html, body {
   pointer-events: none;
   opacity: 0.04;
   contain: strict;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  /* 2 octaves instead of 4 — halves GPU filter work, visually identical at 4% opacity */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
   background-repeat: repeat;
 }
 
@@ -103,11 +104,12 @@ html, body {
   transform: scaleX(var(--underline-scale, 0));
 }
 
-/* ── model-viewer cursor override ── */
+/* ── model-viewer cursor + pointer override ── */
 model-viewer,
 model-viewer::part(default-progress-bar) {
   cursor: none !important;
 }
+
 
 /* ── Hide model-viewer default loading bar ── */
 model-viewer::part(default-progress-bar) {
@@ -116,87 +118,6 @@ model-viewer::part(default-progress-bar) {
   height: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
-}
-
-/* ── Glass Dialog (StatueViewer + DostoevskyBust) ── */
-.glass-dialog {
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 12px;
-  padding: 0;
-  z-index: 20;
-  pointer-events: none;
-}
-
-.glass-dialog__body {
-  padding: 18px 26px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.glass-dialog__line {
-  font-family: var(--font-jetbrains), monospace;
-  font-size: 0.55rem;
-  letter-spacing: 0.15em;
-  color: rgba(0, 0, 0, 0.45);
-  font-style: italic;
-  margin: 0;
-}
-
-.glass-dialog__divider {
-  width: 28px;
-  height: 1px;
-  background: rgba(0, 0, 0, 0.12);
-}
-
-.glass-dialog__sub {
-  font-family: var(--font-jetbrains), monospace;
-  font-size: 0.5rem;
-  letter-spacing: 0.1em;
-  color: rgba(0, 0, 0, 0.35);
-  margin: 0;
-}
-
-.glass-dialog__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-jetbrains), monospace;
-  font-size: 0.5rem;
-  letter-spacing: 0.25em;
-  color: rgba(0, 0, 0, 0.55);
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.glass-dialog__link:hover {
-  color: var(--accent);
-}
-
-.glass-dialog__link-text {
-  text-transform: uppercase;
-}
-
-.glass-dialog__cursor {
-  display: inline-block;
-  width: 1px;
-  height: 0.8em;
-  background: currentColor;
-  animation: cursor-blink 1s step-end infinite;
-}
-
-.glass-dialog__arrow {
-  font-size: 0.65rem;
-  transition: transform 0.3s ease;
-}
-
-.glass-dialog__link:hover .glass-dialog__arrow {
-  transform: translate(2px, -2px);
 }
 
 /* ── Section Heading ── */
@@ -224,11 +145,15 @@ model-viewer::part(default-progress-bar) {
 .marquee-track {
   display: inline-flex;
   animation: marquee 40s linear infinite;
+  will-change: transform;
+  contain: layout style;
 }
 
 .marquee-track-reverse {
   display: inline-flex;
   animation: marquee 40s linear infinite reverse;
+  will-change: transform;
+  contain: layout style;
 }
 
 /* ── Section Divider ── */
@@ -929,12 +854,17 @@ body.book-modal-open .bottom-nav {
 }
 
 /* ── Halo Pulse Animations (3D model viewers) ── */
+/* GPU-composited: only transform + opacity, no layout/paint */
 .animate-halo-pulse {
   animation: halo-pulse 5s ease-in-out infinite;
+  will-change: transform, opacity;
+  contain: layout style;
 }
 
 .animate-halo-pulse-inner {
   animation: halo-pulse-inner 4s ease-in-out infinite 0.5s;
+  will-change: transform, opacity;
+  contain: layout style;
 }
 
 /* ═══════════════════════════════════
@@ -1003,12 +933,18 @@ body.book-modal-open .bottom-nav {
   }
 }
 
+/* ── Content Visibility — skip rendering for far-offscreen sections ── */
+/* Browsers skip layout/paint for sections outside ~500px viewport margin */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
+
 /* ── Reduced Motion ── */
 @media (prefers-reduced-motion: reduce) {
   .cursor-arrow,
   .marquee-track,
   .marquee-track-reverse,
-  .glass-dialog__cursor,
   .terminal-dialog__cursor,
   .music-eq-bar,
   .animate-halo-pulse,

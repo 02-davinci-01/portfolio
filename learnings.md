@@ -34,7 +34,25 @@ model-viewer::part(default-progress-bar) {
 Also pass `cursor: "none"` in the inline `style` prop on the `<model-viewer>` element itself.
 
 ### z-index layering
-The 3D model sits at `z-index: 15` (inline style). Any overlay that should appear *above* the model (like the glass dialog) must use a higher z-index. The glass dialog uses `z-20` (Tailwind) = z-index 20.
+The hero statue model-viewer sits at `z-index: 15`. The terminal dialog sits at `z-index: 10` (visually behind the statue). The hover zone in `page.tsx` sits at `z-index: 16` above both. Other section model-viewers also use `z-index: 15`.
+
+### Hover zone blocks clicks to dialog (2026-02-17)
+**Problem:** The invisible hover zone (`z-index: 16`, right 50% of hero) intercepts ALL clicks, preventing the Resume Granted `<a>` at `z-index: 10` from receiving them. `statueWrapperRef` has `opacity < 1` which creates a stacking context at effective z-0, so everything inside it (dialog, model) is below the hover zone regardless of inner z-index values.
+**Fix:** Hide-and-peek technique on the hover zone's `onClick`:
+```js
+onClick={(e) => {
+  const el = e.currentTarget;
+  el.style.pointerEvents = 'none';
+  const below = document.elementFromPoint(e.clientX, e.clientY);
+  el.style.pointerEvents = '';
+  const anchor = below instanceof HTMLAnchorElement ? below : below?.closest('a');
+  if (anchor) anchor.click();
+}}
+```
+This keeps the hover zone active for `mouseenter`/`mouseleave` (statue zoom) while forwarding clicks to the `<a>` below.
+
+### Shadow DOM pointer-events
+External CSS (`model-viewer canvas {}`) and host-level `pointer-events: none` do NOT reliably disable pointer events on model-viewer's Shadow DOM internals. Don't fight it — use z-index stacking and click-forwarding instead.
 
 ### Camera & interaction
 - `disable-zoom` and `disable-pan` prevent user from breaking the intended camera framing.

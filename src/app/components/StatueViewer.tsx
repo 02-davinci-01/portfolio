@@ -74,7 +74,7 @@ const StatueViewer = memo(function StatueViewer({ hovered = false }: StatueViewe
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 2 }}>
         {/* Outer ambient glow — warm gold */}
         <div
-          className="absolute rounded-full transition-all duration-[1400ms] ease-out animate-halo-pulse"
+          className="absolute rounded-full transition-[width,filter,background] duration-[1400ms] ease-out animate-halo-pulse"
           style={{
             width: hovered ? "130%" : "95%",
             aspectRatio: "1",
@@ -86,7 +86,7 @@ const StatueViewer = memo(function StatueViewer({ hovered = false }: StatueViewe
         />
         {/* Core glow — brighter gold */}
         <div
-          className="absolute rounded-full transition-all duration-[1000ms] ease-out animate-halo-pulse-inner"
+          className="absolute rounded-full transition-[width,filter,background] duration-[1000ms] ease-out animate-halo-pulse-inner"
           style={{
             width: hovered ? "85%" : "65%",
             aspectRatio: "1",
@@ -98,7 +98,7 @@ const StatueViewer = memo(function StatueViewer({ hovered = false }: StatueViewe
         />
         {/* Ground shadow — stays dark for grounding */}
         <div
-          className="absolute transition-all duration-[1200ms] ease-out"
+          className="absolute transition-[width,height,filter,background] duration-[1200ms] ease-out"
           style={{
             bottom: '5%',
             width: hovered ? '70%' : '55%',
@@ -112,7 +112,7 @@ const StatueViewer = memo(function StatueViewer({ hovered = false }: StatueViewe
         />
         {/* Solid ring — visible on white, pulses gently */}
         <div
-          className="absolute rounded-full transition-all duration-[1200ms] ease-out animate-halo-pulse"
+          className="absolute rounded-full transition-[width] duration-[1200ms] ease-out animate-halo-pulse"
           style={{
             width: hovered ? '55%' : '45%',
             aspectRatio: '1',
@@ -122,16 +122,17 @@ const StatueViewer = memo(function StatueViewer({ hovered = false }: StatueViewe
         />
       </div>
 
-      {/* Terminal dialog — dark, sharp, positioned behind the zoomed head */}
+      {/* Terminal dialog — behind the statue, z-index below model-viewer */}
       <AnimatePresence>
         {dialogOpen && (
           <div
-            className="absolute pointer-events-none"
+            className="absolute"
             style={{
               top: '-1%',
               left: '50%',
               transform: 'translateX(-50%)',
               zIndex: 10,
+              pointerEvents: 'none',
             }}
           >
             <motion.div
@@ -149,11 +150,15 @@ const StatueViewer = memo(function StatueViewer({ hovered = false }: StatueViewe
 
                 <div className="terminal-dialog__divider" />
 
-                <a
-                  href="/resume.pdf"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
                   className="terminal-dialog__link group pointer-events-auto"
+                  onClick={() => {
+                    const a = document.createElement('a');
+                    a.href = '/resume.pdf';
+                    a.download = 'Vedant_Nagwanshi_Resume.pdf';
+                    a.click();
+                  }}
                 >
                   <span className="terminal-dialog__link-text">
                     Resume Granted
@@ -162,7 +167,7 @@ const StatueViewer = memo(function StatueViewer({ hovered = false }: StatueViewe
                   <svg className="terminal-dialog__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M7 17l9.2-9.2M17 17V7H7" />
                   </svg>
-                </a>
+                </button>
               </div>
             </motion.div>
           </div>

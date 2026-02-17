@@ -93,7 +93,7 @@ function BookModal({
             height={600}
             className="book-modal__image"
             sizes="(max-width: 640px) 100vw, 200px"
-            unoptimized
+            quality={80}
           />
         </motion.div>
 
@@ -158,7 +158,7 @@ const BookCard = memo(function BookCard({
               height={90}
               className="book-card__img object-cover w-full h-full"
               sizes="60px"
-              unoptimized
+              quality={75}
             />
           </div>
 
