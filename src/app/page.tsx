@@ -1441,85 +1441,91 @@ export default function Home() {
             {/* Vertical timeline line — GSAP scrubs scaleY */}
             <div
               ref={timelineLineRef}
-              className="absolute left-0 md:left-[8.33%] top-0 bottom-0 w-px bg-neutral-200 origin-top"
+              className="absolute left-0 top-0 bottom-0 w-px bg-neutral-200 origin-top"
               style={{ transform: "scaleY(0)" }}
             />
 
             <div className="space-y-16 md:space-y-20">
               {/* Experience 1 */}
               <RevealOnScroll>
-                <div className="relative pl-6 md:pl-0 md:grid md:grid-cols-12 md:gap-4">
-                  <div className="absolute left-[-4px] top-[6px] md:static md:col-span-1 md:flex md:items-start md:justify-center md:relative">
-                    <div className="timeline-dot w-2 h-2 rounded-full bg-neutral-900 md:mt-2 relative z-10" />
+                <div className="relative pl-6 md:pl-12">
+                  <div className="absolute left-[-4px] top-[6px] z-10">
+                    <div className="timeline-dot w-2 h-2 rounded-full bg-neutral-900" />
                   </div>
-                  <div className="md:col-span-3 mb-2 md:mb-0">
-                    <span className="font-mono text-[0.65rem] tracking-[0.3em] uppercase text-neutral-400">
-                      2025 — Present
-                    </span>
-                  </div>
-                  <div className="md:col-span-7 space-y-2">
-                    <h3 className="text-xl font-bold tracking-tight text-neutral-900 font-[family-name:var(--font-space)]">
-                      Software Engineer
-                    </h3>
-                    <p className="text-sm font-mono text-[var(--accent)] tracking-wide">
-                      AceCloud
-                    </p>
-                    <p className="text-sm text-neutral-400 leading-relaxed font-mono pt-2 max-w-lg">
-                      Working on Infrastructure as Code, DBaaS, and Registry as a Service.
-                      Cloud solutions for the masses.
-                    </p>
+                  <div className="md:flex md:gap-12">
+                    <div className="shrink-0 mb-2 md:mb-0 md:w-48">
+                      <span className="font-mono text-[0.65rem] tracking-[0.3em] uppercase text-neutral-400">
+                        2025 — Present
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-bold tracking-tight text-neutral-900 font-[family-name:var(--font-space)]">
+                        Software Engineer
+                      </h3>
+                      <p className="text-sm font-mono text-[var(--accent)] tracking-wide">
+                        AceCloud
+                      </p>
+                      <p className="text-sm text-neutral-400 leading-relaxed font-mono pt-2 max-w-lg">
+                        Working on Infrastructure as Code, DBaaS, and Registry as a Service.
+                        Cloud solutions for the masses.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </RevealOnScroll>
 
               {/* Experience 2 */}
               <RevealOnScroll delay={0.1}>
-                <div className="relative pl-6 md:pl-0 md:grid md:grid-cols-12 md:gap-4">
-                  <div className="absolute left-[-4px] top-[6px] md:static md:col-span-1 md:flex md:items-start md:justify-center md:relative">
-                    <div className="timeline-dot w-2 h-2 rounded-full bg-neutral-300 md:mt-2 relative z-10" />
+                <div className="relative pl-6 md:pl-12">
+                  <div className="absolute left-[-4px] top-[6px] z-10">
+                    <div className="timeline-dot w-2 h-2 rounded-full bg-neutral-300" />
                   </div>
-                  <div className="md:col-span-3 mb-2 md:mb-0">
-                    <span className="font-mono text-[0.65rem] tracking-[0.3em] uppercase text-neutral-400">
-                      May — Jul 2025
-                    </span>
-                  </div>
-                  <div className="md:col-span-7 space-y-2">
-                    <h3 className="text-xl font-bold tracking-tight text-neutral-900 font-[family-name:var(--font-space)]">
-                      SDE Intern
-                    </h3>
-                    <p className="text-sm font-mono text-[var(--accent)] tracking-wide">
-                      WPC
-                    </p>
-                    <p className="text-sm text-neutral-400 leading-relaxed font-mono pt-2 max-w-lg">
-                      Developed the frontend architecture for a real-estate startup,
-                      while driving content and design initiatives.
-                    </p>
+                  <div className="md:flex md:gap-12">
+                    <div className="shrink-0 mb-2 md:mb-0 md:w-48">
+                      <span className="font-mono text-[0.65rem] tracking-[0.3em] uppercase text-neutral-400">
+                        May — Jul 2025
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-bold tracking-tight text-neutral-900 font-[family-name:var(--font-space)]">
+                        SDE Intern
+                      </h3>
+                      <p className="text-sm font-mono text-[var(--accent)] tracking-wide">
+                        WPC
+                      </p>
+                      <p className="text-sm text-neutral-400 leading-relaxed font-mono pt-2 max-w-lg">
+                        Developed the frontend architecture for a real-estate startup,
+                        while driving content and design initiatives.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </RevealOnScroll>
 
               {/* Experience 3 */}
               <RevealOnScroll delay={0.2}>
-                <div className="relative pl-6 md:pl-0 md:grid md:grid-cols-12 md:gap-4">
-                  <div className="absolute left-[-4px] top-[6px] md:static md:col-span-1 md:flex md:items-start md:justify-center md:relative">
-                    <div className="timeline-dot w-2 h-2 rounded-full bg-neutral-300 md:mt-2 relative z-10" />
+                <div className="relative pl-6 md:pl-12">
+                  <div className="absolute left-[-4px] top-[6px] z-10">
+                    <div className="timeline-dot w-2 h-2 rounded-full bg-neutral-300" />
                   </div>
-                  <div className="md:col-span-3 mb-2 md:mb-0">
-                    <span className="font-mono text-[0.65rem] tracking-[0.3em] uppercase text-neutral-400">
-                      2023 — Present
-                    </span>
-                  </div>
-                  <div className="md:col-span-7 space-y-2">
-                    <h3 className="text-xl font-bold tracking-tight text-neutral-900 font-[family-name:var(--font-space)]">
-                      Founding Member
-                    </h3>
-                    <p className="text-sm font-mono text-[var(--accent)] tracking-wide">
-                      Geek Room
-                    </p>
-                    <p className="text-sm text-neutral-400 leading-relaxed font-mono pt-2 max-w-lg">
-                      Built one of the largest technical communities in India with over 80k members.
-                      Lead the Design and Documentation department across 20+ chapters.
-                    </p>
+                  <div className="md:flex md:gap-12">
+                    <div className="shrink-0 mb-2 md:mb-0 md:w-48">
+                      <span className="font-mono text-[0.65rem] tracking-[0.3em] uppercase text-neutral-400">
+                        2023 — Present
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-bold tracking-tight text-neutral-900 font-[family-name:var(--font-space)]">
+                        Founding Member
+                      </h3>
+                      <p className="text-sm font-mono text-[var(--accent)] tracking-wide">
+                        Geek Room
+                      </p>
+                      <p className="text-sm text-neutral-400 leading-relaxed font-mono pt-2 max-w-lg">
+                        Built one of the largest technical communities in India with over 80k members.
+                        Lead the Design and Documentation department across 20+ chapters.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </RevealOnScroll>
