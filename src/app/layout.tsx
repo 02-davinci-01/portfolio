@@ -17,8 +17,7 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: "Portfolio | 02-davinci-01",
-  description:
-    "Portfolio of Vedant Nagwanshi — Developer & Creative Technologist",
+  description: "davinci of the 21st Century",
 };
 
 export default function RootLayout({
