@@ -16,7 +16,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Vedant Nagwanshi — Creative Developer",
+  title: "Portfolio | 02-davinci-01",
   description:
     "Portfolio of Vedant Nagwanshi — Developer & Creative Technologist",
 };
