@@ -1127,7 +1127,7 @@ export default function Home() {
           className="absolute inset-0 flex items-end justify-center md:justify-end pointer-events-none"
           style={{ opacity: 0 }}
         >
-          <div className="w-[80vw] h-[85vh] md:w-[55vw] md:h-[95vh] md:-translate-x-[3vw]">
+          <div className="w-[130vw] h-[85vh] md:w-[55vw] md:h-[95vh] md:-translate-x-[3vw]">
             <StatueViewer
               hovered={statueHover.hovered}
               scrollProgress={heroScrollProgress > 0 ? heroScrollProgress : undefined}

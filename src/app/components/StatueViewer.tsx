@@ -233,7 +233,7 @@ const StatueViewer = memo(function StatueViewer({
             height: "100%",
             backgroundColor: "transparent",
             outline: "none",
-            contain: "layout style paint",
+            contain: "layout style",
             position: "relative" as const,
             zIndex: 15,
             cursor: "none",
