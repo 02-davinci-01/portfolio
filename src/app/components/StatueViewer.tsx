@@ -5,13 +5,23 @@ import { AnimatePresence, motion } from "framer-motion";
 
 interface StatueViewerProps {
   hovered?: boolean;
+  /** Mobile scroll-driven zoom: 0 = default, 1 = fully zoomed. Overrides `hovered` when > 0. */
+  scrollProgress?: number;
 }
 
 /**
  * StatueViewer — stone statue with hover-zoom to face + translucent glass dialog.
- * Hover state is controlled externally via the `hovered` prop (right-half hero zone).
+ * Desktop: hover state controlled via `hovered` prop.
+ * Mobile: scroll-driven via `scrollProgress` (0-1). Camera zooms at ~50%, dialog at ~70%.
  */
-const StatueViewer = memo(function StatueViewer({ hovered = false }: StatueViewerProps) {
+const StatueViewer = memo(function StatueViewer({
+  hovered = false,
+  scrollProgress,
+}: StatueViewerProps) {
+  // Derive effective zoom state: scrollProgress takes precedence when defined
+  const isScrollDriven = scrollProgress !== undefined && scrollProgress > 0;
+  const effectiveHovered = isScrollDriven ? scrollProgress > 0.35 : hovered;
+  const showDialog = isScrollDriven ? scrollProgress > 0.55 : false;
   const containerRef = useRef<HTMLDivElement>(null);
   const modelRef = useRef<any>(null);
   const [isNearViewport, setIsNearViewport] = useState(false);
@@ -21,12 +31,16 @@ const StatueViewer = memo(function StatueViewer({ hovered = false }: StatueViewe
   const dialogTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Delay dialog open so it appears after camera rotation completes (~700ms)
+  // On mobile (scroll-driven), dialog opens immediately when scrollProgress > 0.7
   useEffect(() => {
     if (dialogTimerRef.current) {
       clearTimeout(dialogTimerRef.current);
       dialogTimerRef.current = null;
     }
-    if (hovered) {
+    if (isScrollDriven) {
+      // Scroll-driven: instant, no timer
+      setDialogOpen(showDialog);
+    } else if (effectiveHovered) {
       dialogTimerRef.current = setTimeout(() => setDialogOpen(true), 700);
     } else {
       setDialogOpen(false);
@@ -34,7 +48,7 @@ const StatueViewer = memo(function StatueViewer({ hovered = false }: StatueViewe
     return () => {
       if (dialogTimerRef.current) clearTimeout(dialogTimerRef.current);
     };
-  }, [hovered]);
+  }, [effectiveHovered, isScrollDriven, showDialog]);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -80,7 +94,7 @@ const StatueViewer = memo(function StatueViewer({ hovered = false }: StatueViewe
   const defaultFov = "30deg";
   const zoomedOrbit = "10deg 106deg 250%";
   const zoomedFov = "13deg";
-  const isZoomed = hovered && !prefersReducedMotion;
+  const isZoomed = effectiveHovered && !prefersReducedMotion;
 
   return (
     <div
@@ -93,24 +107,24 @@ const StatueViewer = memo(function StatueViewer({ hovered = false }: StatueViewe
         <div
           className="absolute rounded-full transition-[width,filter,background] duration-[1400ms] ease-out animate-halo-pulse"
           style={{
-            width: hovered ? "130%" : "95%",
+            width: effectiveHovered ? "130%" : "95%",
             aspectRatio: "1",
-            background: hovered
+            background: effectiveHovered
               ? "radial-gradient(circle, rgba(200,170,80,0.18) 0%, rgba(200,170,80,0.08) 40%, transparent 70%)"
               : "radial-gradient(circle, rgba(200,170,80,0.12) 0%, rgba(200,170,80,0.05) 35%, transparent 65%)",
-            filter: hovered ? "blur(50px)" : "blur(40px)",
+            filter: effectiveHovered ? "blur(50px)" : "blur(40px)",
           }}
         />
         {/* Core glow — brighter gold */}
         <div
           className="absolute rounded-full transition-[width,filter,background] duration-[1000ms] ease-out animate-halo-pulse-inner"
           style={{
-            width: hovered ? "85%" : "65%",
+            width: effectiveHovered ? "85%" : "65%",
             aspectRatio: "1",
-            background: hovered
+            background: effectiveHovered
               ? "radial-gradient(circle, rgba(210,180,90,0.22) 0%, rgba(200,170,80,0.10) 30%, transparent 60%)"
               : "radial-gradient(circle, rgba(200,170,80,0.16) 0%, rgba(200,170,80,0.07) 25%, transparent 55%)",
-            filter: hovered ? "blur(35px)" : "blur(25px)",
+            filter: effectiveHovered ? "blur(35px)" : "blur(25px)",
           }}
         />
         {/* Ground shadow — stays dark for grounding */}
@@ -118,20 +132,20 @@ const StatueViewer = memo(function StatueViewer({ hovered = false }: StatueViewe
           className="absolute transition-[width,height,filter,background] duration-[1200ms] ease-out"
           style={{
             bottom: '5%',
-            width: hovered ? '70%' : '55%',
-            height: hovered ? '18%' : '14%',
+            width: effectiveHovered ? '70%' : '55%',
+            height: effectiveHovered ? '18%' : '14%',
             borderRadius: '50%',
-            background: hovered
+            background: effectiveHovered
               ? 'radial-gradient(ellipse, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.05) 50%, transparent 80%)'
               : 'radial-gradient(ellipse, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.03) 45%, transparent 75%)',
-            filter: hovered ? 'blur(20px)' : 'blur(15px)',
+            filter: effectiveHovered ? 'blur(20px)' : 'blur(15px)',
           }}
         />
         {/* Solid ring — visible on white, pulses gently */}
         <div
           className="absolute rounded-full transition-[width] duration-[1200ms] ease-out animate-halo-pulse"
           style={{
-            width: hovered ? '55%' : '45%',
+            width: effectiveHovered ? '55%' : '45%',
             aspectRatio: '1',
             border: '1.5px solid rgba(180,160,100,0.25)',
             boxShadow: '0 0 20px 2px rgba(200,170,80,0.08)',
@@ -145,10 +159,10 @@ const StatueViewer = memo(function StatueViewer({ hovered = false }: StatueViewe
           <div
             className="absolute"
             style={{
-              top: '-1%',
+              top: isScrollDriven ? '-5%' : '-1%',
               left: '50%',
               transform: 'translateX(-50%)',
-              zIndex: 10,
+              zIndex: 5,
               pointerEvents: 'none',
             }}
           >

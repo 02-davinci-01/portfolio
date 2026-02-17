@@ -298,3 +298,19 @@ CSS-only `model-float-inner` class uses `animation: model-float 4.5s ease-in-out
 Design cards use GSAP for staggered `y`-offset reveals instead of CSS `transform: translateY()`. GSAP animates to different `y` end values based on column position (`i % 3` for desktop, `i % 2` for mobile), creating a masonry-like stagger. This avoids CSS/GSAP transform conflicts and lets the stagger animate in naturally as part of the section's assembly choreography.
 
 *Append new findings as they come. Keep entries concise. Date-stamp bug fixes.*
+
+---
+
+## Mobile Responsiveness (2026-02-17)
+
+### Scroll-driven zoom pattern for touch devices
+On mobile, `hover` events don't fire. 3D model zoom + dialog interactions gated behind hover are inert on touch. **Fix:** Add a `scrollProgress` prop (0-1) to model-viewer components (`StatueViewer`, `DostoevskyBust`). Use GSAP `ScrollTrigger.create()` with `scrub: 0.3` and `onUpdate` to write progress to a ref + React state. Component derives `effectiveHovered` from `scrollProgress > 0.5` and dialog visibility from `scrollProgress > 0.7`. The hero section gets `min-h-[150vh]` on mobile for scroll runway. The `interpolation-decay="200"` on model-viewer handles smooth camera transitions.
+
+### ScrollTrigger onUpdate + React setState throttling
+Calling `setState` on every ScrollTrigger `onUpdate` (which fires ~60fps during scrub) is expensive. **Fix:** Compare against a ref and only update state when delta > 0.02 (`Math.abs(p - ref.current) > 0.02`). Gives ~50 discrete steps which is enough for threshold-based logic.
+
+### Bottom nav centering on mobile
+`left: 50%; transform: translateX(-50%)` centers the nav. Must reset to `left: auto; transform: none; right: 4rem` at `min-width: 768px` to restore desktop positioning. Framer Motion's `animate` on the nav applies its own transforms — the CSS `transform: translateX(-50%)` for centering and Framer's transform co-exist because Framer sets `transform` directly via style, which overrides the CSS class. At desktop, `transform: none` in the media query is overridden by Framer anyway. On mobile before Framer hydrates, the CSS centering works. After hydration, Framer takes over. This is fine because Framer's `y: 20, opacity: 0` initial state hides it anyway.
+
+### Side rule hidden on mobile
+The side rule (`position: fixed; left: 2rem`) overlaps content on small screens. Use `display: none` by default, `display: flex` at `min-width: 768px`. The GSAP fade still works because it controls `opacity`, not `display`.

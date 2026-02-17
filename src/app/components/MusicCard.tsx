@@ -220,7 +220,7 @@ const MusicCard = memo(function MusicCard({
       <AnimatePresence>
         {modalOpen && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center px-6"
+            className="fixed inset-0 z-[9500] flex items-center justify-center px-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { duration: 0.35, ease: easeOut } }}
             exit={{ opacity: 0, transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] } }}

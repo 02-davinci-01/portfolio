@@ -16,7 +16,7 @@ import DesignGallery from "./components/DesignGallery";
 import BookCard from "./components/BookCard";
 import MusicCard from "./components/MusicCard";
 import IntroScreen from "./components/IntroScreen";
-import { gsap, useGSAP } from "@/app/lib/gsap";
+import { gsap, ScrollTrigger, useGSAP } from "@/app/lib/gsap";
 
 const CraftRedbull = dynamic(
   () => import("./components/CraftRedbull"),
@@ -217,12 +217,20 @@ export default function Home() {
   const closingAnimDone = useRef(false);
   const [closingHoverable, setClosingHoverable] = useState(false);
 
+  /* ── Mobile scroll-driven zoom for Dostoevsky bust (WP-2) ── */
+  const [closingScrollProgress, setClosingScrollProgress] = useState(0);
+  const closingScrollRef = useRef(0);
+
   /* ── Refs for hero entrance choreography ── */
   const headerRef = useRef<HTMLElement>(null);
   const sideRuleRef = useRef<HTMLDivElement>(null);
   const heroTaglineRef = useRef<HTMLDivElement>(null);
   const heroNameRef = useRef<HTMLDivElement>(null);
   const heroQuoteRef = useRef<HTMLDivElement>(null);
+
+  /* ── Mobile scroll-driven zoom for hero statue (WP-1) ── */
+  const [heroScrollProgress, setHeroScrollProgress] = useState(0);
+  const heroScrollRef = useRef(0);
 
   /* ── Active section tracking ── */
   const [activeSection, setActiveSection] = useState<string>("");
@@ -562,6 +570,25 @@ export default function Home() {
                 },
               }
             );
+
+            // Mobile scroll-driven bust zoom — replaces hover (WP-2)
+            // After bust enters, scrolling further deepens into the closing section,
+            // scrubbing the camera zoom and revealing the Dostoevsky quote.
+            if (closingRef.current) {
+              ScrollTrigger.create({
+                trigger: closingRef.current,
+                start: "top 40%",
+                end: "bottom bottom",
+                scrub: 0.3,
+                onUpdate: (self) => {
+                  const p = self.progress;
+                  if (Math.abs(p - closingScrollRef.current) > 0.02) {
+                    closingScrollRef.current = p;
+                    setClosingScrollProgress(p);
+                  }
+                },
+              });
+            }
           }
         }
       );
@@ -599,7 +626,7 @@ export default function Home() {
                 scrollTrigger: {
                   trigger: heroRef.current,
                   start: "top top",
-                  end: "bottom 60%",
+                  end: desktop ? "bottom 60%" : "30% top",
                   scrub: 0.5,
                 },
               }
@@ -607,6 +634,7 @@ export default function Home() {
           }
 
           // A1: Statue lingers slightly longer, then fades + shrinks
+          // Mobile: starts later (85%) so statue stays visible through zoom + dialog
           if (statueWrapperRef.current) {
             gsap.fromTo(
               statueWrapperRef.current,
@@ -616,8 +644,8 @@ export default function Home() {
                 scale: 0.97,
                 scrollTrigger: {
                   trigger: heroRef.current,
-                  start: "top top",
-                  end: "bottom 40%",
+                  start: desktop ? "top top" : "85% top",
+                  end: desktop ? "bottom 40%" : "bottom top",
                   scrub: 0.5,
                 },
               }
@@ -640,6 +668,26 @@ export default function Home() {
                 },
               }
             );
+          }
+
+          // A3 (mobile only): Scroll-driven statue zoom — replaces hover
+          // Hero section is taller on mobile (min-h-[150vh]) to give runway.
+          // Zoom completes at 45% of hero scroll (faster) so dialog appears while
+          // statue is still well-centered in viewport. Dialog at progress > 0.55.
+          if (!desktop && heroRef.current) {
+            ScrollTrigger.create({
+              trigger: heroRef.current,
+              start: "top top",
+              end: "45% top",
+              scrub: 0.3,
+              onUpdate: (self) => {
+                const p = self.progress;
+                if (Math.abs(p - heroScrollRef.current) > 0.02) {
+                  heroScrollRef.current = p;
+                  setHeroScrollProgress(p);
+                }
+              },
+            });
           }
         }
       );
@@ -1071,7 +1119,7 @@ export default function Home() {
          ═══════════════════════════════════════════════════════════════ */}
       <section
         ref={heroRef}
-        className="relative h-screen flex flex-col justify-end pb-16 px-8 md:px-16 lg:px-24"
+        className="relative min-h-[150vh] md:min-h-0 md:h-screen flex flex-col justify-end pb-16 px-8 md:px-16 lg:px-24"
       >
         {/* 3D statue — centered-right, hover reveals archaic resume dialog */}
         <div
@@ -1080,7 +1128,10 @@ export default function Home() {
           style={{ opacity: 0 }}
         >
           <div className="w-[80vw] h-[85vh] md:w-[55vw] md:h-[95vh] md:-translate-x-[3vw]">
-            <StatueViewer hovered={statueHover.hovered} />
+            <StatueViewer
+              hovered={statueHover.hovered}
+              scrollProgress={heroScrollProgress > 0 ? heroScrollProgress : undefined}
+            />
           </div>
         </div>
 
@@ -1117,8 +1168,8 @@ export default function Home() {
           }}
         />
 
-        {/* Hero text */}
-        <div ref={heroTextRef} className="relative z-10 max-w-2xl">
+        {/* Hero text — hidden on mobile (statue + scroll-zoom is the entire experience) */}
+        <div ref={heroTextRef} className="relative z-10 max-w-2xl hidden md:block">
           <div ref={heroTaglineRef} style={{ opacity: 0 }}>
             <p className="font-mono text-[0.55rem] tracking-[0.4em] uppercase text-neutral-400 mb-5">
               I like to make stuff :)
@@ -1142,21 +1193,6 @@ export default function Home() {
           </div>
 
 
-        </div>
-
-        {/* Mobile fallback — CRT terminal below hero text */}
-        <div className="md:hidden mt-6 relative z-10">
-          <RevealOnScroll delay={0.8}>
-            <a
-              href="/resume.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 font-mono text-[0.65rem] tracking-[0.2em] uppercase text-neutral-400 hover:text-[var(--accent)] transition-colors duration-300"
-            >
-              <span className="w-6 h-px bg-neutral-300" />
-              resume.exe → download
-            </a>
-          </RevealOnScroll>
         </div>
 
         {/* Scroll indicator — GSAP entrance after intro, scroll-scrubbed exit */}
@@ -1196,9 +1232,9 @@ export default function Home() {
         id="opera"
         className="relative py-32 md:py-48 px-8 md:px-16 lg:px-24"
       >
-        {/* 3D Da Vinci bust — positioned right, mirroring Journey/Craft sections */}
-        <div className="section-model absolute top-0 right-0 bottom-0 w-full md:w-[45%] flex items-start justify-center pointer-events-none" style={{ paddingTop: '2rem', opacity: 0 }}>
-          <div className="w-[60%] h-[65%] max-h-[460px]">
+        {/* 3D Da Vinci bust — aligned with section heading top-right */}
+        <div className="section-model absolute top-0 right-0 w-[35%] md:w-[45%] h-[320px] md:h-auto md:bottom-0 flex items-start justify-end md:justify-center pointer-events-none pt-0 md:pt-8" style={{ paddingRight: '0.5rem', opacity: 0 }}>
+          <div className="w-full md:w-[60%] h-full max-h-[240px] md:max-h-[460px]">
             <OperaDaVinci />
           </div>
         </div>
@@ -1381,9 +1417,9 @@ export default function Home() {
         id="iter"
         className="relative py-32 md:py-48 px-8 md:px-16 lg:px-24"
       >
-        {/* 3D computer — positioned right, elevated like the hero statue */}
-        <div className="section-model absolute top-0 right-0 bottom-0 w-full md:w-[55%] flex items-start justify-center pointer-events-none" style={{ paddingTop: '4rem', opacity: 0 }}>
-          <div className="w-[70%] h-[80%] max-h-[600px]">
+        {/* 3D computer — aligned with section heading top-right */}
+        <div className="section-model absolute top-0 right-0 w-[35%] md:w-[55%] h-[320px] md:h-auto md:bottom-0 flex items-start justify-end md:justify-center pointer-events-none pt-0 md:pt-16" style={{ paddingRight: '0.5rem', opacity: 0 }}>
+          <div className="w-full md:w-[70%] h-full max-h-[240px] md:max-h-[600px]">
             <JourneyComputer />
           </div>
         </div>
@@ -1500,9 +1536,9 @@ export default function Home() {
         id="artificium"
         className="relative py-32 md:py-48 px-8 md:px-16 lg:px-24"
       >
-        {/* 3D redbull — positioned right, mirroring the Journey section */}
-        <div className="section-model absolute top-0 right-0 bottom-0 w-full md:w-[45%] flex items-start justify-center pointer-events-none" style={{ paddingTop: '6rem', opacity: 0 }}>
-          <div className="w-[50%] h-[55%] max-h-[380px]">
+        {/* 3D redbull — aligned with section heading top-right */}
+        <div className="section-model absolute top-0 right-0 w-[30%] md:w-[45%] h-[280px] md:h-auto md:bottom-0 flex items-start justify-end md:justify-center pointer-events-none pt-0 md:pt-24" style={{ paddingRight: '0.5rem', opacity: 0 }}>
+          <div className="w-full md:w-[50%] h-full max-h-[200px] md:max-h-[380px]">
             <CraftRedbull />
           </div>
         </div>
@@ -1532,9 +1568,9 @@ export default function Home() {
         id="afflatus"
         className="relative py-32 md:py-48 px-8 md:px-16 lg:px-24"
       >
-        {/* 3D Helmet — positioned right, contained to heading area */}
-        <div className="section-model absolute top-0 right-0 w-full md:w-[45%] flex items-start justify-center pointer-events-none" style={{ paddingTop: '6rem', height: '480px', opacity: 0 }}>
-          <div className="w-[50%] h-[80%] max-h-[380px]">
+        {/* 3D Helmet — aligned with section heading top-right */}
+        <div className="section-model absolute top-0 right-0 w-[30%] md:w-[45%] h-[280px] md:h-[480px] flex items-start justify-end md:justify-center pointer-events-none pt-0 md:pt-24" style={{ paddingRight: '0.5rem', opacity: 0 }}>
+          <div className="w-full md:w-[50%] h-full max-h-[200px] md:max-h-[380px]">
             <PabulumHelmet />
           </div>
         </div>
@@ -1674,9 +1710,9 @@ export default function Home() {
         id="nexus"
         className="relative pt-32 md:pt-48 pb-16 md:pb-24 px-8 md:px-16 lg:px-24"
       >
-        {/* 3D Dog — positioned right, mirroring other section models */}
-        <div className="section-model absolute top-0 right-0 bottom-0 w-full md:w-[50%] flex items-start justify-center pointer-events-none" style={{ paddingTop: '1rem', opacity: 0 }}>
-          <div className="w-[75%] h-[65%] max-h-[480px]">
+        {/* 3D Dog — aligned with section heading top-right */}
+        <div className="section-model absolute top-0 right-0 w-[35%] md:w-[50%] h-[320px] md:h-auto md:bottom-0 flex items-start justify-end md:justify-center pointer-events-none pt-0 md:pt-4" style={{ paddingRight: '0.5rem', opacity: 0 }}>
+          <div className="w-full md:w-[75%] h-full max-h-[240px] md:max-h-[480px]">
             <NexusDog />
           </div>
         </div>
@@ -1737,16 +1773,15 @@ export default function Home() {
       <section
         ref={closingRef}
         id="closing"
-        className="relative flex flex-col justify-end overflow-clip"
+        className="relative flex flex-col justify-end overflow-visible md:overflow-clip"
         style={{ minHeight: '100vh' }}
       >
+        {/* Extra scroll runway on mobile for bust zoom scrub (WP-2) */}
+        <div className="md:hidden" style={{ height: '30vh' }} aria-hidden="true" />
         {/* Static centering wrapper — never touched by GSAP */}
         <div
-          className="absolute z-10 left-1/2 bottom-0"
+          className="absolute z-10 left-1/2 bottom-0 closing-bust-wrapper"
           style={{
-            width: '60vw',
-            height: '100vh',
-            transform: 'translateX(-50%) translateY(calc(5% - 30px))',
             pointerEvents: 'none',
           }}
         >
@@ -1758,27 +1793,30 @@ export default function Home() {
             onMouseEnter={closingHoverable ? dostoevskyHover.onEnter : undefined}
             onMouseLeave={closingHoverable ? dostoevskyHover.onLeave : undefined}
           >
-            <DostoevskyBust hovered={dostoevskyHover.hovered} />
+            <DostoevskyBust
+              hovered={dostoevskyHover.hovered}
+              scrollProgress={closingScrollProgress > 0 ? closingScrollProgress : undefined}
+            />
           </div>
         </div>
 
-        {/* DIVINE HERMIT text — animated by GSAP Batch C */}
-        <div className="w-full px-6 md:px-12 lg:px-20 pb-0 relative z-20 pointer-events-none">
+        {/* DIVINE HERMIT text — animated by GSAP Batch C, hidden on mobile */}
+        <div className="hidden md:block w-full px-6 md:px-12 lg:px-20 pb-0 relative z-20 pointer-events-none">
           <div className="flex items-end justify-between select-none">
             <span
               ref={divineRef}
-              className="font-mono text-[clamp(3rem,8vw,7rem)] font-black tracking-tighter text-neutral-900 leading-none"
+              className="font-mono text-[clamp(2rem,10vw,7rem)] md:text-[clamp(3rem,8vw,7rem)] font-black tracking-tighter text-neutral-900 leading-none"
               style={{ opacity: 0 }}
             >
               divine
             </span>
 
             {/* Spacer — holds the gap where the statue visually sits */}
-            <div className="flex-shrink-0 w-[160px] md:w-[220px] lg:w-[280px]" />
+            <div className="flex-shrink-0 w-[80px] md:w-[220px] lg:w-[280px]" />
 
             <span
               ref={hermitRef}
-              className="font-mono text-[clamp(3rem,8vw,7rem)] font-black tracking-tighter text-neutral-900 leading-none"
+              className="font-mono text-[clamp(2rem,10vw,7rem)] md:text-[clamp(3rem,8vw,7rem)] font-black tracking-tighter text-neutral-900 leading-none"
               style={{ opacity: 0 }}
             >
               hermit

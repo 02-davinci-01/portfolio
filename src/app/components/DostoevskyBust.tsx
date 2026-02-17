@@ -5,16 +5,22 @@ import { AnimatePresence, motion } from "framer-motion";
 
 interface DostoevskyBustProps {
   hovered?: boolean;
+  /** Mobile scroll-driven zoom: 0 = default, 1 = fully zoomed. Overrides `hovered` when > 0. */
+  scrollProgress?: number;
 }
 
 /**
  * DostoevskyBust — 3D rock-scan Dostoevsky statue with hover-zoom + quote.
- * Uses the model's native photogrammetry textures; PBR tweaked for a bright
- * stone read on a white background.
+ * Desktop: hover state controlled via `hovered` prop.
+ * Mobile: scroll-driven via `scrollProgress` (0-1). Camera zooms at ~50%, quote at ~75%.
  */
 const DostoevskyBust = memo(function DostoevskyBust({
   hovered = false,
+  scrollProgress,
 }: DostoevskyBustProps) {
+  // Derive effective zoom state: scrollProgress takes precedence when defined
+  const isScrollDriven = scrollProgress !== undefined && scrollProgress > 0;
+  const effectiveHovered = isScrollDriven ? scrollProgress > 0.5 : hovered;
   const containerRef = useRef<HTMLDivElement>(null);
   const modelRef = useRef<any>(null);
   const texturesApplied = useRef(false);
@@ -93,8 +99,8 @@ const DostoevskyBust = memo(function DostoevskyBust({
   // Zoom: swing clockwise to face-on, close-up intimate framing
   const zoomedOrbit = "50deg 90deg 130%";
   const zoomedFov = "90deg";
-  const isZoomed = hovered && !prefersReducedMotion;
-  const dialogOpen = hovered;
+  const isZoomed = effectiveHovered && !prefersReducedMotion;
+  const dialogOpen = isScrollDriven ? scrollProgress! > 0.75 : hovered;
 
   return (
     <div
@@ -107,24 +113,24 @@ const DostoevskyBust = memo(function DostoevskyBust({
         <div
           className="absolute rounded-full transition-[width,filter,background] duration-[1400ms] ease-out animate-halo-pulse"
           style={{
-            width: hovered ? "120%" : "90%",
+            width: effectiveHovered ? "120%" : "90%",
             aspectRatio: "1",
-            background: hovered
+            background: effectiveHovered
               ? "radial-gradient(circle, rgba(200,170,80,0.18) 0%, rgba(200,170,80,0.08) 40%, transparent 70%)"
               : "radial-gradient(circle, rgba(200,170,80,0.12) 0%, rgba(200,170,80,0.05) 35%, transparent 65%)",
-            filter: hovered ? "blur(50px)" : "blur(40px)",
+            filter: effectiveHovered ? "blur(50px)" : "blur(40px)",
           }}
         />
         {/* Core glow — brighter gold */}
         <div
           className="absolute rounded-full transition-[width,filter,background] duration-[1000ms] ease-out animate-halo-pulse-inner"
           style={{
-            width: hovered ? "75%" : "60%",
+            width: effectiveHovered ? "75%" : "60%",
             aspectRatio: "1",
-            background: hovered
+            background: effectiveHovered
               ? "radial-gradient(circle, rgba(210,180,90,0.22) 0%, rgba(200,170,80,0.10) 30%, transparent 60%)"
               : "radial-gradient(circle, rgba(200,170,80,0.16) 0%, rgba(200,170,80,0.07) 25%, transparent 55%)",
-            filter: hovered ? "blur(35px)" : "blur(25px)",
+            filter: effectiveHovered ? "blur(35px)" : "blur(25px)",
           }}
         />
         {/* Ground shadow — stays dark for grounding */}
@@ -132,20 +138,20 @@ const DostoevskyBust = memo(function DostoevskyBust({
           className="absolute transition-[width,height,filter,background] duration-[1200ms] ease-out"
           style={{
             bottom: '8%',
-            width: hovered ? '65%' : '50%',
-            height: hovered ? '16%' : '12%',
+            width: effectiveHovered ? '65%' : '50%',
+            height: effectiveHovered ? '16%' : '12%',
             borderRadius: '50%',
-            background: hovered
+            background: effectiveHovered
               ? 'radial-gradient(ellipse, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.05) 50%, transparent 80%)'
               : 'radial-gradient(ellipse, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.03) 45%, transparent 75%)',
-            filter: hovered ? 'blur(20px)' : 'blur(15px)',
+            filter: effectiveHovered ? 'blur(20px)' : 'blur(15px)',
           }}
         />
         {/* Solid ring — visible on white, pulses gently */}
         <div
           className="absolute rounded-full transition-[width] duration-[1200ms] ease-out animate-halo-pulse"
           style={{
-            width: hovered ? '50%' : '40%',
+            width: effectiveHovered ? '50%' : '40%',
             aspectRatio: '1',
             border: '1.5px solid rgba(180,160,100,0.25)',
             boxShadow: '0 0 20px 2px rgba(200,170,80,0.08)',
@@ -153,16 +159,16 @@ const DostoevskyBust = memo(function DostoevskyBust({
         />
       </div>
 
-      {/* Terminal dialog — dark, sharp, appears after rotation */}
+      {/* Terminal dialog — behind the statue, z-index below model-viewer */}
       <AnimatePresence>
         {dialogOpen && (
           <div
             className="absolute pointer-events-none"
             style={{
-              top: '8%',
+              top: isScrollDriven ? '-30px' : '8%',
               left: '50%',
               transform: 'translateX(-50%)',
-              zIndex: 10,
+              zIndex: 5,
             }}
           >
             <motion.div
@@ -181,7 +187,7 @@ const DostoevskyBust = memo(function DostoevskyBust({
             >
               <div className="terminal-dialog__body">
                 <p className="terminal-dialog__line">
-                  &ldquo;He who overcomes suffering and fear will become god.&rdquo;
+                  &ldquo;He who overcomes pain and fear will himself be god.&rdquo;
                 </p>
 
                 <div className="terminal-dialog__divider" />
