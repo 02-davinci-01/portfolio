@@ -44,7 +44,9 @@ export default function ScriptaLanding({ posts }: { posts: LandingPost[] }) {
   const [kind, setKind] = useState<Kind | "all">("all");
   const [year, setYear] = useState<string>("all");
   const [focused, setFocused] = useState(false);
+  const [kindOpen, setKindOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const kindRef = useRef<HTMLDivElement>(null);
 
   const years = useMemo(
     () => Array.from(new Set(posts.map((p) => p.year))).sort((a, b) => Number(b) - Number(a)),
@@ -86,6 +88,25 @@ export default function ScriptaLanding({ posts }: { posts: LandingPost[] }) {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, []);
+
+  // Close the mobile Kind dropdown on outside click or Escape.
+  useEffect(() => {
+    if (!kindOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (kindRef.current && !kindRef.current.contains(e.target as Node)) {
+        setKindOpen(false);
+      }
+    };
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setKindOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onEsc);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onEsc);
+    };
+  }, [kindOpen]);
 
   const clearAll = () => {
     setQ("");
@@ -158,23 +179,55 @@ export default function ScriptaLanding({ posts }: { posts: LandingPost[] }) {
           </div>
 
           <div className="filters">
-            <span className="flabel">Kind</span>
-            <button
-              className={`chip${kind === "all" ? " active" : ""}`}
-              onClick={() => setKind("all")}
-            >
-              All
-            </button>
-            {KIND_ORDER.map((k) => (
+            <div className="kind-group" ref={kindRef}>
+              <span className="flabel">Kind</span>
+              {/* Mobile-only toggle — collapses the chips into a dropdown */}
               <button
-                key={k}
-                className={`chip${kind === k ? " active" : ""}`}
-                onClick={() => setKind(k)}
+                type="button"
+                className={`kind-toggle${kindOpen ? " open" : ""}`}
+                aria-expanded={kindOpen}
+                aria-label="Filter by kind"
+                onClick={() => setKindOpen((o) => !o)}
               >
-                {KIND_META[k].latin}
-                <span className="en">{KIND_META[k].en}</span>
+                <span>{kind === "all" ? "All" : KIND_META[kind].latin}</span>
+                <svg
+                  className="chev"
+                  width="9"
+                  height="9"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  aria-hidden="true"
+                >
+                  <path d="M2.5 4.5L6 8l3.5-3.5" />
+                </svg>
               </button>
-            ))}
+              <div className={`kind-chips${kindOpen ? " open" : ""}`}>
+                <button
+                  className={`chip${kind === "all" ? " active" : ""}`}
+                  onClick={() => {
+                    setKind("all");
+                    setKindOpen(false);
+                  }}
+                >
+                  All
+                </button>
+                {KIND_ORDER.map((k) => (
+                  <button
+                    key={k}
+                    className={`chip${kind === k ? " active" : ""}`}
+                    onClick={() => {
+                      setKind(k);
+                      setKindOpen(false);
+                    }}
+                  >
+                    {KIND_META[k].latin}
+                    <span className="en">{KIND_META[k].en}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
             <span className="sep" />
             <span className="flabel">Year</span>
             <button

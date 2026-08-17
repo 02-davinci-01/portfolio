@@ -112,7 +112,11 @@
 /* ── masthead (landing) ── */
 .scripta-page .mast {
   position: relative;
-  padding: 76px 0 26px;
+  /* top/bottom only — leave the horizontal 30px from `.wrap` intact so the
+     masthead lines up with the controls + ledger instead of going full-bleed
+     (most visible on mobile, where the container spans the whole screen). */
+  padding-top: 76px;
+  padding-bottom: 26px;
 }
 .scripta-page .ghost {
   position: absolute;
@@ -299,6 +303,91 @@
 @keyframes scripta-blink {
   50% {
     opacity: 0;
+  }
+}
+
+/* On phones the terminal path + "press /" hint starve the input of room, so
+   drop them and bump the input to 16px (≥16px stops iOS Safari from
+   auto-zooming the page when the field is focused). */
+@media (max-width: 640px) {
+  .scripta-page .prompt .path,
+  .scripta-page .prompt .slash {
+    display: none;
+  }
+  .scripta-page .prompt input {
+    font-size: 16px;
+  }
+}
+
+/* ── Kind filter: inline chips on desktop, collapsible dropdown on mobile ── */
+.scripta-page .kind-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  position: relative;
+}
+/* Desktop shows the chips inline, so the toggle button is hidden there. */
+.scripta-page .kind-toggle {
+  display: none;
+}
+.scripta-page .kind-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  /* Collapse the six Kind chips (which otherwise wrap to ~3 rows) behind a
+     single chip-styled toggle that opens a dropdown. */
+  .scripta-page .kind-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--hair);
+    background: transparent;
+    color: var(--ink);
+    padding: 5px 11px;
+    border-radius: 2px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .scripta-page .kind-toggle:hover {
+    border-color: var(--ink-dim);
+  }
+  .scripta-page .kind-toggle .chev {
+    transition: transform 0.2s;
+  }
+  .scripta-page .kind-toggle.open .chev {
+    transform: rotate(180deg);
+  }
+  .scripta-page .kind-chips {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 45;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    min-width: 190px;
+    padding: 8px;
+    background: #fff;
+    border: 1px solid var(--hair);
+    border-radius: 3px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+  .scripta-page .kind-chips.open {
+    display: flex;
+  }
+  .scripta-page .kind-chips .chip {
+    width: 100%;
+    text-align: left;
   }
 }
 
@@ -845,6 +934,31 @@
   .scripta-page .rail,
   .scripta-page .marg {
     display: none;
+  }
+  /* Surface author's side-notes below the article on mobile rather than
+     dropping them — but only when the post actually has notes, so an empty
+     aside never leaves a phantom gap. */
+  .scripta-page .marg:has(.note) {
+    display: block;
+    padding-left: 0;
+    margin-top: 44px;
+    padding-top: 28px;
+    border-top: 1px solid var(--hair);
+  }
+  .scripta-page .marg:has(.note)::before {
+    content: "Notes";
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 20px;
+  }
+  .scripta-page .marg:has(.note) .stick {
+    position: static;
+  }
+  .scripta-page .marg:has(.note) .note {
+    margin-bottom: 22px;
   }
 }
 
