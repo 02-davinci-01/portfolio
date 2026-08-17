@@ -1,0 +1,1274 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Scripta — scoped styles for /scripta and /scripta/[slug].
+   Everything is namespaced under .scripta-page so the deliberately
+   generic class names (.row, .chip, .code…) can't collide with the
+   main portfolio. Tokens mirror the design mockups; --accent is
+   inherited from the site's :root (same #2B3A4E).
+   ═══════════════════════════════════════════════════════════════════ */
+
+.scripta-page {
+  --panel: #f7f6f4;
+  --ink: #171717;
+  --ink-dim: #555553;
+  --ink-faint: #9d9d99;
+  --hair: rgba(0, 0, 0, 0.1);
+  --hair-soft: rgba(0, 0, 0, 0.06);
+  --accent-lift: #3d5670;
+  --chip: #141416;
+  --mono: var(--font-jetbrains), ui-monospace, monospace;
+  --disp: var(--font-space), system-ui, sans-serif;
+  --read: var(--font-newsreader), Georgia, serif;
+
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 15px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* The main site hides the native cursor and paints its own; Scripta has
+   no custom cursor, so restore real cursors within this subtree. */
+@media (pointer: fine) and (hover: hover) {
+  .scripta-page,
+  .scripta-page * {
+    cursor: auto !important;
+  }
+  .scripta-page a,
+  .scripta-page button,
+  .scripta-page .chip,
+  .scripta-page .r-tag,
+  .scripta-page .row {
+    cursor: pointer !important;
+  }
+  .scripta-page input {
+    cursor: text !important;
+  }
+}
+
+.scripta-page a {
+  color: inherit;
+  text-decoration: none;
+}
+.scripta-page .wrap {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 30px;
+}
+
+/* ── top bar ── */
+.scripta-page .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--hair-soft);
+}
+.scripta-page .topbar .wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+}
+.scripta-page .brand {
+  font-family: var(--disp);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-size: 15px;
+}
+.scripta-page .crumb {
+  font-size: 11px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 46vw;
+}
+.scripta-page .crumb b {
+  color: var(--ink);
+  font-weight: 500;
+}
+/* Clickable parent segment(s) of the breadcrumb — dim by default, ink on hover. */
+.scripta-page .crumb .crumb-link {
+  transition: color 0.2s;
+}
+.scripta-page .crumb .crumb-link:hover {
+  color: var(--ink);
+}
+.scripta-page .folio {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+}
+@media (max-width: 640px) {
+  .scripta-page .crumb {
+    display: none;
+  }
+}
+
+/* ── masthead (landing) ── */
+.scripta-page .mast {
+  position: relative;
+  padding: 76px 0 26px;
+}
+.scripta-page .ghost {
+  position: absolute;
+  top: 2px;
+  right: 8px;
+  font-family: var(--disp);
+  font-weight: 700;
+  font-size: 200px;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(0, 0, 0, 0.07);
+  user-select: none;
+  pointer-events: none;
+}
+@media (max-width: 640px) {
+  .scripta-page .ghost {
+    font-size: 120px;
+  }
+}
+.scripta-page .kick {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-bottom: 20px;
+}
+.scripta-page .kick .tick {
+  width: 26px;
+  height: 1px;
+  background: var(--accent);
+}
+.scripta-page .sec-title {
+  font-family: var(--disp);
+  font-weight: 700;
+  font-size: clamp(46px, 7.5vw, 92px);
+  letter-spacing: -0.045em;
+  line-height: 0.9;
+  margin: 0;
+}
+.scripta-page .xlate {
+  position: relative;
+  display: inline-block;
+  cursor: default;
+}
+.scripta-page .xlate .en {
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--accent);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.3s, transform 0.3s;
+  font-style: italic;
+  white-space: nowrap;
+}
+.scripta-page .xlate .lt {
+  transition: opacity 0.3s;
+}
+.scripta-page .xlate:hover .lt {
+  opacity: 0.12;
+}
+.scripta-page .xlate:hover .en {
+  opacity: 1;
+  transform: translateY(0);
+}
+.scripta-page .mast-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-top: 26px;
+}
+.scripta-page .dek {
+  max-width: 520px;
+  color: var(--ink-dim);
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0;
+}
+.scripta-page .dek b {
+  color: var(--ink);
+  font-weight: 500;
+}
+.scripta-page .stats {
+  display: flex;
+  gap: 26px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+.scripta-page .stats .n {
+  display: block;
+  font-family: var(--disp);
+  font-weight: 500;
+  font-size: 26px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+
+/* ── control bar (sticky under topbar) ── */
+.scripta-page .controls {
+  position: sticky;
+  top: 56px;
+  z-index: 40;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--hair);
+  border-bottom: 1px solid var(--hair);
+  margin-top: 34px;
+}
+.scripta-page .controls .wrap {
+  padding-top: 16px;
+  padding-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.scripta-page .prompt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #efeeeb;
+  border: 1px solid var(--hair);
+  border-radius: 3px;
+  padding: 12px 14px;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 13px;
+  transition: box-shadow 0.2s, background 0.2s;
+}
+.scripta-page .prompt .path {
+  color: #8b97a4;
+  white-space: nowrap;
+}
+.scripta-page .prompt .caret {
+  color: var(--accent-lift);
+}
+.scripta-page .prompt input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  caret-color: var(--accent-lift);
+}
+.scripta-page .prompt input::placeholder {
+  color: var(--ink-faint);
+}
+.scripta-page .prompt .slash {
+  border: 1px solid var(--hair);
+  border-radius: 3px;
+  padding: 1px 7px;
+  font-size: 10px;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+.scripta-page .prompt.on {
+  box-shadow: 0 0 0 1px var(--accent-lift);
+  background: #f2f1ee;
+}
+.scripta-page .blink {
+  width: 7px;
+  height: 15px;
+  background: var(--ink-faint);
+  display: none;
+  margin-left: -4px;
+  animation: scripta-blink 1.15s step-end infinite;
+}
+.scripta-page .prompt.idle .blink {
+  display: inline-block;
+}
+@keyframes scripta-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ── filters ── */
+.scripta-page .filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 11px;
+}
+.scripta-page .flabel {
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-right: 4px;
+}
+.scripta-page .chip {
+  border: 1px solid var(--hair);
+  background: transparent;
+  color: var(--ink-dim);
+  padding: 5px 11px;
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+.scripta-page .chip:hover {
+  border-color: var(--ink-dim);
+  color: var(--ink);
+}
+.scripta-page .chip.active {
+  background: var(--chip);
+  border-color: var(--chip);
+  color: #fff;
+}
+.scripta-page .chip .en {
+  color: var(--ink-faint);
+  text-transform: none;
+  margin-left: 6px;
+  font-size: 10px;
+}
+.scripta-page .chip.active .en {
+  color: #8ea6c0;
+}
+.scripta-page .sep {
+  width: 1px;
+  height: 16px;
+  background: var(--hair);
+  margin: 0 6px;
+}
+.scripta-page .count {
+  margin-left: auto;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+.scripta-page .count b {
+  color: var(--ink);
+  font-weight: 500;
+}
+@media (max-width: 640px) {
+  .scripta-page .count {
+    margin-left: 0;
+  }
+}
+
+/* ── ledger ── */
+.scripta-page .ledger {
+  margin-top: 8px;
+}
+.scripta-page .ledger-h {
+  display: grid;
+  grid-template-columns: 48px 132px 1fr 92px 54px 26px;
+  gap: 18px;
+  padding: 16px 0 12px;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  border-bottom: 1px solid var(--hair);
+}
+.scripta-page .row {
+  display: grid;
+  grid-template-columns: 48px 132px 1fr 92px 54px 26px;
+  gap: 18px;
+  align-items: center;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--hair-soft);
+  position: relative;
+  transition: transform 0.3s, background 0.3s;
+}
+.scripta-page .row::before {
+  content: "";
+  position: absolute;
+  left: -30px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  transform: scaleY(0);
+  transition: transform 0.3s;
+}
+.scripta-page .row:hover {
+  background: var(--panel);
+  transform: translateX(6px);
+}
+.scripta-page .row:hover::before {
+  transform: scaleY(1);
+}
+.scripta-page .r-num {
+  font-size: 12px;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+.scripta-page .row:hover .r-num {
+  color: var(--accent);
+}
+.scripta-page .r-cat {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.scripta-page .r-cat .en {
+  color: var(--ink-faint);
+  margin-left: 5px;
+  text-transform: none;
+}
+.scripta-page .r-title {
+  font-family: var(--disp);
+  font-weight: 500;
+  font-size: 19px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  line-height: 1.15;
+}
+.scripta-page .r-sub {
+  display: block;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  margin-top: 5px;
+  max-width: 62ch;
+  line-height: 1.5;
+}
+.scripta-page .r-tags {
+  margin-top: 10px;
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.scripta-page .r-tag {
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  background: #f1f0ed;
+  border: 1px solid var(--hair-soft);
+  border-radius: 2px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+  line-height: 1;
+}
+.scripta-page .r-tag::before {
+  content: "#";
+  color: var(--ink-faint);
+  margin-right: 1px;
+  transition: color 0.2s;
+}
+.scripta-page .r-tag:hover {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.scripta-page .r-tag:hover::before {
+  color: #8ea6c0;
+}
+.scripta-page .r-date,
+.scripta-page .r-time {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+.scripta-page .r-arr {
+  justify-self: end;
+  color: var(--ink-faint);
+  transition: color 0.3s, transform 0.3s;
+}
+.scripta-page .row:hover .r-arr {
+  color: var(--ink);
+  transform: translateX(4px);
+}
+.scripta-page .r-glyph {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: height 0.35s, opacity 0.3s, margin-top 0.35s;
+}
+.scripta-page .r-glyph svg {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.scripta-page .row:hover .r-glyph {
+  height: 60px;
+  opacity: 1;
+  margin-top: 14px;
+}
+/* clear "this is a link" affordance revealed alongside the glyph */
+.scripta-page .r-read {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.scripta-page .r-read svg {
+  transition: transform 0.3s;
+}
+.scripta-page .row:hover .r-read svg {
+  transform: translateX(3px);
+}
+.scripta-page mark {
+  background: rgba(61, 86, 112, 0.16);
+  color: var(--accent);
+  padding: 0 1px;
+}
+@media (max-width: 760px) {
+  .scripta-page .ledger-h {
+    display: none;
+  }
+  .scripta-page .row {
+    grid-template-columns: 34px 1fr 24px;
+    gap: 12px;
+    align-items: start;
+  }
+  .scripta-page .r-num {
+    grid-row: 1;
+  }
+  .scripta-page .r-cat {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 10px;
+  }
+  .scripta-page .r-body {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .scripta-page .r-date {
+    grid-column: 2;
+    grid-row: 3;
+    margin-top: 8px;
+  }
+  .scripta-page .r-time {
+    display: none;
+  }
+  .scripta-page .r-arr {
+    grid-row: 1;
+  }
+  .scripta-page .row:hover .r-glyph {
+    height: 0;
+    opacity: 0;
+  }
+  .scripta-page .row:hover {
+    transform: none;
+  }
+}
+
+/* ── empty state ── */
+.scripta-page .empty {
+  display: none;
+  padding: 70px 0;
+  text-align: center;
+  color: var(--ink-faint);
+}
+.scripta-page .empty.show {
+  display: block;
+}
+.scripta-page .empty .big {
+  font-family: var(--disp);
+  font-size: 22px;
+  color: var(--ink-dim);
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+.scripta-page .empty button {
+  margin-top: 16px;
+  background: var(--chip);
+  color: #fff;
+  border: 0;
+  padding: 9px 16px;
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+/* ── footer ── */
+.scripta-page footer {
+  padding: 64px 0 56px;
+  color: var(--ink-faint);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  margin-top: 40px;
+  border-top: 1px solid var(--hair);
+}
+.scripta-page footer .wrap {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Article page
+   ═══════════════════════════════════════════════════════════════════ */
+.scripta-page .progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+  background: var(--accent);
+  z-index: 60;
+  transition: width 0.1s linear;
+}
+.scripta-page .head {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 60px 30px 0;
+}
+.scripta-page .back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 44px;
+  transition: gap 0.2s, color 0.2s;
+}
+.scripta-page .back:hover {
+  gap: 12px;
+  color: var(--ink);
+}
+.scripta-page .a-kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+.scripta-page .a-kicker .rn {
+  font-family: var(--disp);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0;
+}
+.scripta-page .a-kicker .en {
+  color: var(--ink-faint);
+}
+.scripta-page h1.a-title {
+  font-family: var(--disp);
+  font-weight: 700;
+  font-size: clamp(34px, 5.4vw, 54px);
+  letter-spacing: -0.04em;
+  line-height: 1.02;
+  margin: 0 0 22px;
+}
+.scripta-page .a-dek {
+  font-family: var(--read);
+  font-size: 21px;
+  line-height: 1.5;
+  color: var(--ink-dim);
+  margin: 0 0 34px;
+  max-width: 60ch;
+}
+.scripta-page .a-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 20px 0;
+  border-top: 1px solid var(--hair);
+  border-bottom: 1px solid var(--hair);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.scripta-page .a-meta .dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--hair);
+}
+.scripta-page .a-meta .a-links {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.scripta-page .a-meta .a-links a {
+  color: var(--ink-dim);
+  border-bottom: 1px solid var(--hair);
+  padding-bottom: 2px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.scripta-page .a-meta .a-links a:hover {
+  color: var(--accent);
+  border-color: var(--accent-lift);
+}
+/* repository link — GitHub mark + label, sits a touch stronger than crossposts */
+.scripta-page .a-meta .a-links a.repo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+  border-bottom-color: var(--ink-faint);
+}
+.scripta-page .a-meta .a-links a.repo svg {
+  transition: transform 0.2s;
+}
+.scripta-page .a-meta .a-links a.repo:hover {
+  color: var(--accent);
+}
+.scripta-page .a-meta .a-links a.repo:hover svg {
+  transform: translateY(-1px);
+}
+@media (max-width: 560px) {
+  .scripta-page .a-meta .a-links {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+/* hero schematic */
+.scripta-page .figure {
+  max-width: 760px;
+  margin: 40px auto 0;
+  padding: 0 30px;
+}
+.scripta-page .figure .frame {
+  border: 1px solid var(--hair);
+  background: var(--panel);
+  padding: 34px;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+.scripta-page .figure .frame::before {
+  content: "FIG. I";
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--ink-faint);
+}
+.scripta-page .figcap {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  margin-top: 12px;
+  text-align: center;
+}
+
+/* body grid */
+.scripta-page .grid {
+  max-width: 1160px;
+  margin: 56px auto 0;
+  padding: 0 30px;
+  display: grid;
+  grid-template-columns: 150px minmax(0, 700px) 1fr;
+  gap: 0;
+  justify-content: center;
+}
+.scripta-page .rail {
+  position: sticky;
+  top: 96px;
+  align-self: start;
+  padding-right: 24px;
+  font-size: 11px;
+}
+.scripta-page .rail .lbl {
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 16px;
+}
+.scripta-page .toc {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.scripta-page .toc a {
+  display: flex;
+  gap: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+  transition: color 0.2s;
+}
+.scripta-page .toc a .rn {
+  color: #c3c3bf;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.2s;
+}
+.scripta-page .toc a:hover {
+  color: var(--ink-dim);
+}
+.scripta-page .toc a.on {
+  color: var(--ink);
+}
+.scripta-page .toc a.on .rn {
+  color: var(--accent);
+}
+@media (max-width: 960px) {
+  .scripta-page .grid {
+    grid-template-columns: minmax(0, 720px);
+    justify-content: center;
+  }
+  .scripta-page .rail,
+  .scripta-page .marg {
+    display: none;
+  }
+}
+
+/* reading column */
+.scripta-page .article {
+  min-width: 0;
+}
+.scripta-page .article h2 {
+  font-family: var(--disp);
+  font-weight: 500;
+  font-size: 26px;
+  letter-spacing: -0.025em;
+  margin: 52px 0 18px;
+  scroll-margin-top: 96px;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+.scripta-page .article h2 .rn {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  font-weight: 400;
+  transform: translateY(-2px);
+}
+.scripta-page .article p {
+  font-family: var(--read);
+  font-size: 18.5px;
+  line-height: 1.74;
+  color: #2a2a28;
+  margin: 0 0 22px;
+}
+.scripta-page .article a.link {
+  color: var(--accent);
+  border-bottom: 1px solid rgba(61, 86, 112, 0.35);
+  transition: border-color 0.2s;
+}
+.scripta-page .article a.link:hover {
+  border-color: var(--accent);
+}
+.scripta-page .article strong {
+  font-weight: 500;
+  color: var(--ink);
+}
+.scripta-page .article em {
+  font-style: italic;
+}
+.scripta-page code.inl {
+  font-family: var(--mono);
+  font-size: 14px;
+  background: var(--panel);
+  border: 1px solid var(--hair-soft);
+  border-radius: 2px;
+  padding: 1px 6px;
+  color: var(--accent);
+}
+
+/* code block */
+.scripta-page .code {
+  background: #fbfbfa;
+  border: 1px solid var(--hair);
+  border-left: 2px solid var(--accent);
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.75;
+  padding: 18px 20px;
+  margin: 28px 0;
+  overflow-x: auto;
+  color: #3b3b39;
+  white-space: pre;
+}
+.scripta-page .code .cap {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 12px;
+  white-space: normal;
+}
+.scripta-page .code .k {
+  color: var(--accent);
+}
+.scripta-page .code .s {
+  color: #5f7a52;
+}
+.scripta-page .code .c {
+  color: var(--ink-faint);
+}
+
+/* inline figure */
+.scripta-page .infig {
+  border: 1px solid var(--hair);
+  background: var(--panel);
+  padding: 26px;
+  margin: 30px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.scripta-page .infig .figcap {
+  margin-top: 0;
+}
+
+/* inline image (photo / illustration) */
+.scripta-page .imgfig {
+  margin: 34px 0;
+}
+.scripta-page .imgfig img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--hair);
+  background: var(--panel);
+}
+.scripta-page .imgfig .figcap {
+  margin-top: 12px;
+}
+
+/* image gallery — small multiples (e.g. sketchbook pages) */
+.scripta-page .galfig {
+  margin: 34px 0;
+}
+.scripta-page .galgrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.scripta-page .galgrid img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--hair);
+  background: var(--panel);
+}
+/* an odd final image spans the full width so it never sits alone half-empty */
+.scripta-page .galgrid img:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+.scripta-page .galfig .figcap {
+  margin-top: 12px;
+}
+@media (max-width: 560px) {
+  .scripta-page .galgrid {
+    grid-template-columns: 1fr;
+  }
+  .scripta-page .galgrid img:last-child:nth-child(odd) {
+    grid-column: auto;
+  }
+}
+
+/* image placeholder — a finished slot with an obvious gap to fill */
+.scripta-page .imgph {
+  border: 1px dashed var(--hair);
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--panel),
+    var(--panel) 9px,
+    transparent 9px,
+    transparent 18px
+  );
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  padding: 24px;
+}
+.scripta-page .imgph-mark {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.scripta-page .imgph-label {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--ink-dim);
+  max-width: 420px;
+}
+.scripta-page .imgph-hero {
+  min-height: 200px;
+  width: 100%;
+  border: none;
+  background: transparent;
+}
+.scripta-page .frame-img {
+  padding: 0;
+}
+.scripta-page .frame-img img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* pull quote */
+.scripta-page .pull {
+  margin: 44px 0;
+  padding-left: 22px;
+  border-left: 2px solid var(--accent);
+  font-family: var(--disp);
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 1.28;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+/* right marginalia */
+.scripta-page .marg {
+  padding-left: 30px;
+  position: relative;
+}
+.scripta-page .marg .stick {
+  position: sticky;
+  top: 96px;
+}
+.scripta-page .note {
+  padding-left: 14px;
+  border-left: 1px solid var(--accent-lift);
+  margin-bottom: 30px;
+}
+.scripta-page .note .n {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 7px;
+}
+.scripta-page .note p {
+  font-family: var(--read);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-dim);
+  margin: 0;
+}
+.scripta-page .note code {
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 12px;
+}
+
+/* end matter */
+.scripta-page .end {
+  max-width: 760px;
+  margin: 70px auto 0;
+  padding: 0 30px;
+}
+.scripta-page .end .filed {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  padding-top: 30px;
+  border-top: 1px solid var(--hair);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+}
+.scripta-page .end .filed .fl {
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-right: 4px;
+}
+.scripta-page .tag {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-dim);
+  background: #f1f0ed;
+  border: 1px solid var(--hair-soft);
+  border-radius: 2px;
+  padding: 3px 8px;
+}
+.scripta-page .tag::before {
+  content: "#";
+  color: var(--ink-faint);
+}
+.scripta-page .byline {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 34px 0 8px;
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+.scripta-page .byline .av {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--hair);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--disp);
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--accent);
+}
+.scripta-page .byline b {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* prev / next */
+.scripta-page .pn {
+  max-width: 760px;
+  margin: 56px auto 0;
+  padding: 0 30px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border-top: 1px solid var(--hair);
+}
+.scripta-page .pn a {
+  padding: 26px 0;
+  transition: background 0.25s;
+}
+.scripta-page .pn a.next {
+  text-align: right;
+  padding-left: 24px;
+  border-left: 1px solid var(--hair);
+}
+.scripta-page .pn a.prev {
+  padding-right: 24px;
+}
+.scripta-page .pn .dir {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 10px;
+}
+.scripta-page .pn .pt {
+  font-family: var(--disp);
+  font-weight: 500;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+  color: var(--ink-dim);
+  line-height: 1.2;
+  transition: color 0.2s;
+}
+.scripta-page .pn a:hover .pt {
+  color: var(--ink);
+}
+.scripta-page .pn .empty-pn {
+  cursor: default;
+}
+@media (max-width: 560px) {
+  .scripta-page .pn {
+    grid-template-columns: 1fr;
+  }
+  .scripta-page .pn a.next {
+    text-align: left;
+    border-left: 0;
+    padding-left: 0;
+    border-top: 1px solid var(--hair);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Motion — route entrances & filtered-list restagger
+   `backwards` fill applies the start frame before playback but leaves NO
+   lingering transform/opacity once done, so sticky/fixed descendants
+   (topbar, reading-progress bar) keep working after the entrance settles.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Whole-page entrance — replays on every route change (keyed on pathname).
+   A gentle focus-in: content rises, sharpens from a soft blur, and fades up
+   on a long deceleration curve. `will-change` keeps it on its own compositor
+   layer so the motion stays silky rather than stepped. */
+.scripta-page .scripta-enter {
+  animation: scripta-page-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  will-change: opacity, transform;
+}
+@keyframes scripta-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+    filter: blur(9px);
+  }
+  55% {
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Ledger rows cascade in — replays when a Kind/Year filter changes
+   (the `.rows` wrapper is keyed on the active filter, remounting the list).
+   Per-row `animation-delay` is set inline for the stagger. */
+.scripta-page .rows .row {
+  animation: scripta-row-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  will-change: opacity, transform;
+}
+@keyframes scripta-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scripta-page *,
+  .scripta-page *::before,
+  .scripta-page *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

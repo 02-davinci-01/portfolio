@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { JetBrains_Mono, Space_Grotesk, Newsreader } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "./components/SmoothScroll";
 
@@ -12,6 +12,14 @@ const jetbrains = JetBrains_Mono({
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space",
   subsets: ["latin"],
+  display: "swap",
+});
+
+// Newsreader — reading serif, used only for article body in /scripta.
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -57,7 +65,7 @@ self.ModelViewerElement.meshoptDecoderLocation = 'https://cdn.jsdelivr.net/npm/m
         />
       </head>
       <body
-        className={`${jetbrains.variable} ${spaceGrotesk.variable} antialiased`}
+        className={`${jetbrains.variable} ${spaceGrotesk.variable} ${newsreader.variable} antialiased`}
       >
         <SmoothScroll>{children}</SmoothScroll>
       </body>

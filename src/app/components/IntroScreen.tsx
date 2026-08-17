@@ -63,6 +63,10 @@ function IntroScreen({ onComplete }: { onComplete: () => void }) {
       onComplete();
       return;
     }
+
+    // Intentionally plays on every mount — the loading curtain covers the
+    // portfolio's heavy 3D load, so returning from /scripta lands on a
+    // deliberate entrance rather than a half-rendered pop-in.
     document.documentElement.classList.add('intro-active');
     document.body.style.overflow = "hidden";
     timeoutRef.current = setTimeout(typeNext, 600);

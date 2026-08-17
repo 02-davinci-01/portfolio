@@ -42,3 +42,5 @@ yarn-error.log*
 # GLB originals backup (created by optimize-glb script)
 /public/_originals/
 next-env.d.ts
+
+.claude

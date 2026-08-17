@@ -1,8 +1,10 @@
 ﻿"use client";
 
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
+import { getAllPosts, KIND_META } from "./scripta/content";
 import RevealOnScroll from "./components/RevealOnScroll";
 import SplitText from "./components/SplitText";
 import ScrambleText from "./components/ScrambleText";
@@ -60,6 +62,16 @@ const OperaDaVinci = dynamic(
 
 const NexusDog = dynamic(
   () => import("./components/NexusDog"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[340px] bg-neutral-50/30 animate-pulse rounded-lg" />
+    ),
+  }
+);
+
+const ScriptaTypewriter = dynamic(
+  () => import("./components/ScriptaTypewriter"),
   {
     ssr: false,
     loading: () => (
@@ -196,6 +208,7 @@ export default function Home() {
   const navItems = [
     { label: "Opera", href: "#opera", hint: "Works" },
     { label: "Iter", href: "#iter", hint: "Journey" },
+    { label: "Scripta", href: "#scripta", hint: "Writings" },
     { label: "Artificium", href: "#artificium", hint: "Craft" },
     { label: "Afflatus", href: "#afflatus", hint: "Inspiration" },
     { label: "Nexus", href: "#nexus", hint: "Connect" },
@@ -729,7 +742,7 @@ export default function Home() {
           // For each major section, create a timeline that choreographs
           // the heading, content, and model arriving in staggered sequence.
           const sections = gsap.utils.toArray<HTMLElement>(
-            "#opera, #iter, #artificium, #afflatus, #nexus"
+            "#opera, #iter, #scripta, #artificium, #afflatus, #nexus"
           );
 
           sections.forEach((section) => {
@@ -981,7 +994,7 @@ export default function Home() {
 
           // E3: Section content fade-out — gently dims as section scrolls away
           const contentSections = gsap.utils.toArray<HTMLElement>(
-            "#opera, #iter, #artificium, #afflatus, #nexus"
+            "#opera, #iter, #scripta, #artificium, #afflatus, #nexus"
           );
           contentSections.forEach((section) => {
             // Target the z-10 content wrapper (not the 3D model)
@@ -1537,7 +1550,92 @@ export default function Home() {
       <Divider />
 
       {/* ═══════════════════════════════════════════════════════════════
-         IV. ARTIFICIUM — Craft (Design Philosophy)
+         IV. SCRIPTA — The Written Record (Blog / Articles)
+         ═══════════════════════════════════════════════════════════════ */}
+      <section
+        id="scripta"
+        className="relative py-32 md:py-48 px-8 md:px-16 lg:px-24"
+      >
+        {/* 3D typewriter — "the written record." Inherits the same reveal +
+            float choreography as the other section models. */}
+        <div
+          className="section-model absolute top-0 right-0 w-[35%] md:w-[45%] h-[320px] md:h-auto md:bottom-0 flex items-start justify-end md:justify-center pointer-events-none pt-0 md:pt-32"
+          style={{ paddingRight: "0.5rem", opacity: 0 }}
+          aria-hidden="true"
+        >
+          <div className="w-full md:w-[55%] h-full max-h-[240px] md:max-h-[460px]">
+            <ScriptaTypewriter />
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="mb-16 md:mb-24">
+            <RevealOnScroll>
+              <SectionHeading latin="Scripta" english="Writings" index="IV" />
+            </RevealOnScroll>
+          </div>
+
+          <RevealOnScroll delay={0.1}>
+            <p className="text-sm md:text-base text-neutral-400 leading-relaxed font-mono max-w-lg mb-12 md:mb-16">
+              notes from what i find interesting and things that i keep breaking :p
+            </p>
+          </RevealOnScroll>
+
+          {/* Latest writings — ledger preview. Click a row → article. */}
+          <div className="border-t border-neutral-100">
+            {getAllPosts()
+              .slice(0, 4)
+              .map((p, i) => (
+                <RevealOnScroll key={p.slug} delay={0.05 * i}>
+                  <Link
+                    href={`/scripta/${p.slug}`}
+                    data-cursor-hover
+                    className="group grid grid-cols-[2rem_1fr_auto] md:grid-cols-[3rem_1fr_11rem_1.5rem] gap-4 md:gap-8 items-baseline py-6 border-b border-neutral-100 transition-colors duration-300 hover:bg-neutral-50/60"
+                  >
+                    <span className="font-mono text-[0.7rem] text-neutral-300 group-hover:text-[var(--accent)] transition-colors duration-300 tabular-nums">
+                      {p.num}
+                    </span>
+                    <div className="min-w-0">
+                      <h3 className="text-base md:text-lg font-medium tracking-tight text-neutral-900 font-[family-name:var(--font-space)] leading-snug">
+                        {p.title}
+                      </h3>
+                      <p className="text-xs text-neutral-400 font-mono mt-1.5 truncate">
+                        {p.dek}
+                      </p>
+                    </div>
+                    <span className="hidden md:block font-mono text-[0.6rem] tracking-[0.2em] uppercase text-neutral-300 text-right whitespace-nowrap">
+                      {KIND_META[p.kind].latin} · {p.date}
+                    </span>
+                    <span className="justify-self-end font-mono text-neutral-300 group-hover:text-neutral-900 group-hover:translate-x-1 transition-all duration-300">
+                      →
+                    </span>
+                  </Link>
+                </RevealOnScroll>
+              ))}
+          </div>
+
+          <RevealOnScroll delay={0.2}>
+            <div className="flex items-center gap-6 pt-10 md:pt-12">
+              <div className="w-12 h-px bg-neutral-300" />
+              <Link
+                href="/scripta"
+                data-cursor-hover
+                className="inline-flex items-center gap-2 font-mono text-[0.6rem] tracking-[0.25em] uppercase text-neutral-400 hover:text-[var(--accent)] transition-colors duration-300"
+              >
+                Enter the archive
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.2">
+                  <path d="M3 9L9 3M9 3H4M9 3V8" />
+                </svg>
+              </Link>
+            </div>
+          </RevealOnScroll>
+        </div>
+      </section>
+
+      <Divider />
+
+      {/* ═══════════════════════════════════════════════════════════════
+         V. ARTIFICIUM — Craft (Design Philosophy)
          ═══════════════════════════════════════════════════════════════ */}
       <section
         id="artificium"
@@ -1556,7 +1654,7 @@ export default function Home() {
               <SectionHeading
                 latin="Artificium"
                 english="Craft"
-                index="IV"
+                index="V"
               />
             </RevealOnScroll>
           </div>
@@ -1569,7 +1667,7 @@ export default function Home() {
       <Divider />
 
       {/* ═══════════════════════════════════════════════════════════════
-         V. AFFLATUS — Inspiration (Books & Music)
+         VI. AFFLATUS — Inspiration (Books & Music)
          ═══════════════════════════════════════════════════════════════ */}
       <section
         id="afflatus"
@@ -1588,7 +1686,7 @@ export default function Home() {
               <SectionHeading
                 latin="Afflatus"
                 english="Inspiration"
-                index="V"
+                index="VI"
               />
             </RevealOnScroll>
           </div>
@@ -1711,7 +1809,7 @@ export default function Home() {
       />
 
       {/* ═══════════════════════════════════════════════════════════════
-         VI. NEXUS — Connection (Let's Connect)
+         VII. NEXUS — Connection (Let's Connect)
          ═══════════════════════════════════════════════════════════════ */}
       <section
         id="nexus"
@@ -1731,7 +1829,7 @@ export default function Home() {
                 <SectionHeading
                   latin="Nexus"
                   english="Connect"
-                  index="VI"
+                  index="VII"
                 />
               </RevealOnScroll>
             </div>
