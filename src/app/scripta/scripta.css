@@ -1090,16 +1090,115 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
-.scripta-page .galgrid img {
+.scripta-page .galitem {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--hair);
+  background: var(--panel);
+  transition: border-color 0.35s, box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.scripta-page .galitem img {
   display: block;
   width: 100%;
   height: auto;
-  border: 1px solid var(--hair);
-  background: var(--panel);
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), filter 0.5s;
+}
+/* page number tab — slides in on hover */
+.scripta-page .galno {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--chip);
+  padding: 4px 7px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.3s, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  z-index: 1;
+}
+@media (hover: hover) {
+  .scripta-page .galitem:hover {
+    border-color: var(--accent-lift);
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px -18px rgba(23, 23, 23, 0.45);
+  }
+  .scripta-page .galitem:hover img {
+    transform: scale(1.045);
+  }
+  .scripta-page .galitem:hover .galno {
+    opacity: 1;
+    transform: none;
+  }
 }
 /* an odd final image spans the full width so it never sits alone half-empty */
-.scripta-page .galgrid img:last-child:nth-child(odd) {
+.scripta-page .galitem:last-child:nth-child(odd) {
   grid-column: 1 / -1;
+}
+
+/* black & white set — paper goes white, ink goes black; hover lifts the
+   contrast a touch and washes it in the accent, like a blueprint */
+.scripta-page .galfig.mono .galitem img {
+  filter: grayscale(1) contrast(1.12) brightness(1.04);
+}
+.scripta-page .galfig.mono .galitem::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 0.5s;
+  pointer-events: none;
+}
+@media (hover: hover) {
+  .scripta-page .galfig.mono .galitem:hover img {
+    filter: grayscale(1) contrast(1.28) brightness(1.02);
+  }
+  .scripta-page .galfig.mono .galitem:hover::after {
+    opacity: 0.22;
+  }
+}
+/* film grain — fractal noise tile laid over the photo; oversized so it can
+   jitter on hover like a projector reel without showing an edge */
+.scripta-page .galfig.mono .galitem::before {
+  content: "";
+  position: absolute;
+  inset: -24px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 180px 180px;
+  mix-blend-mode: multiply;
+  opacity: 0.32;
+  pointer-events: none;
+  transition: opacity 0.5s;
+}
+@media (hover: hover) {
+  .scripta-page .galfig.mono .galitem:hover::before {
+    opacity: 0.4;
+    animation: gal-grain 0.8s steps(4) infinite;
+  }
+}
+@keyframes gal-grain {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-9px, 6px);
+  }
+  50% {
+    transform: translate(7px, -8px);
+  }
+  75% {
+    transform: translate(-5px, -4px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
 }
 .scripta-page .galfig .figcap {
   margin-top: 12px;
@@ -1108,7 +1207,7 @@
   .scripta-page .galgrid {
     grid-template-columns: 1fr;
   }
-  .scripta-page .galgrid img:last-child:nth-child(odd) {
+  .scripta-page .galitem:last-child:nth-child(odd) {
     grid-column: auto;
   }
 }
@@ -1325,6 +1424,638 @@
     border-left: 0;
     padding-left: 0;
     border-top: 1px solid var(--hair);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Article furniture — highlights, glossary, theorem, worked maths,
+   and the hand-drawn diagrams (figures.tsx / Diagram.tsx)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* highlighter-pen marks in the reading column (the ledger keeps the
+   solid search-hit style above) */
+.scripta-page .article mark {
+  background: linear-gradient(transparent 58%, rgba(61, 86, 112, 0.17) 58%);
+  color: inherit;
+  padding: 0 1px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* link whose target isn't live yet — reads as a link, says so, goes nowhere */
+.scripta-page .article a.link.ph {
+  border-bottom-style: dashed;
+  cursor: help !important;
+}
+.scripta-page .article a.link.ph::after {
+  content: "soon";
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  border: 1px solid var(--hair);
+  border-radius: 2px;
+  padding: 1px 4px;
+  margin-left: 6px;
+  vertical-align: 3px;
+}
+
+/* glossary */
+.scripta-page .defs {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  margin: 6px 0 30px;
+  border-top: 1px solid var(--hair);
+}
+.scripta-page .defs dt,
+.scripta-page .defs dd {
+  margin: 0;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--hair-soft);
+}
+.scripta-page .defs dt {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  padding-top: 17px;
+}
+.scripta-page .defs dd {
+  font-family: var(--read);
+  font-size: 17px;
+  line-height: 1.55;
+  color: #2a2a28;
+}
+@media (max-width: 560px) {
+  .scripta-page .defs {
+    grid-template-columns: 1fr;
+  }
+  .scripta-page .defs dt {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+  .scripta-page .defs dd {
+    padding-top: 4px;
+  }
+}
+
+/* theorem */
+.scripta-page .thm {
+  margin: 28px 0 30px;
+  padding: 20px 24px 18px;
+  border: 1px solid var(--hair);
+  border-top: 2px solid var(--accent);
+  background: var(--panel);
+}
+.scripta-page .thm-k {
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.scripta-page .thm-n {
+  font-family: var(--disp);
+  font-weight: 500;
+  font-size: 17px;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin-top: 4px;
+}
+.scripta-page .thm-s {
+  font-family: var(--read);
+  font-size: 23px;
+  line-height: 1.4;
+  color: var(--ink);
+  text-align: center;
+  padding: 20px 0 18px;
+}
+.scripta-page .thm i,
+.scripta-page .mathbox i {
+  font-style: italic;
+}
+.scripta-page .thm sup,
+.scripta-page .mathbox sup {
+  font-size: 0.68em;
+  line-height: 0;
+}
+.scripta-page .article .thm-p {
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ink-dim);
+  margin: 0;
+}
+.scripta-page .thm-ex {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--hair);
+  font-size: 12.5px;
+  color: var(--ink-dim);
+}
+.scripta-page .thm-exl {
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* worked maths — collapsible */
+.scripta-page .mathbox {
+  margin: 26px 0 32px;
+  border: 1px solid var(--hair);
+  border-left: 2px solid var(--accent);
+  background: #fff;
+}
+.scripta-page .mathbox summary {
+  list-style: none;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  padding: 15px 18px;
+  position: relative;
+  padding-right: 48px;
+}
+.scripta-page .mathbox summary::-webkit-details-marker {
+  display: none;
+}
+@media (pointer: fine) and (hover: hover) {
+  .scripta-page .mathbox summary {
+    cursor: pointer !important;
+  }
+}
+.scripta-page .mb-t {
+  font-family: var(--disp);
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  transition: color 0.2s;
+}
+.scripta-page .mathbox summary:hover .mb-t {
+  color: var(--accent);
+}
+.scripta-page .mb-s {
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}
+.scripta-page .mb-chev {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+}
+.scripta-page .mb-chev::before,
+.scripta-page .mb-chev::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--accent);
+  transition: transform 0.25s;
+}
+.scripta-page .mb-chev::after {
+  transform: rotate(90deg);
+}
+.scripta-page .mathbox[open] .mb-chev::after {
+  transform: rotate(0deg);
+}
+.scripta-page .mathbox[open] summary {
+  border-bottom: 1px solid var(--hair-soft);
+}
+.scripta-page .mb-body {
+  padding: 4px 18px 18px;
+}
+.scripta-page .mathbox[open] .mb-body {
+  animation: scripta-row-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+.scripta-page .mb-sec {
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 18px 0 4px;
+}
+.scripta-page .mb-row {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: baseline;
+  padding: 8px 10px;
+  margin: 0 -10px;
+  border-radius: 2px;
+}
+.scripta-page .mb-row + .mb-row {
+  border-top: 1px dashed var(--hair-soft);
+}
+.scripta-page .mb-row.key {
+  background: rgba(61, 86, 112, 0.07);
+}
+.scripta-page .mb-who {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.scripta-page .mb-eq {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.scripta-page .mb-expr {
+  font-family: var(--read);
+  font-size: 19px;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.scripta-page .mb-work {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-dim);
+}
+.scripta-page .mb-val {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.scripta-page .article .mb-foot {
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ink-dim);
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--hair-soft);
+}
+@media (max-width: 560px) {
+  .scripta-page .mathbox summary {
+    padding: 14px 44px 14px 14px;
+  }
+  .scripta-page .mb-body {
+    padding: 4px 14px 16px;
+  }
+  .scripta-page .mb-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2px 12px;
+  }
+  .scripta-page .mb-who {
+    grid-column: 1 / -1;
+  }
+  .scripta-page .mb-who:empty {
+    display: none;
+  }
+  .scripta-page .mb-expr {
+    font-size: 17px;
+  }
+}
+
+/* ── diagrams ── */
+.scripta-page .dgfig {
+  margin: 34px 0;
+}
+.scripta-page .dg-frame {
+  position: relative;
+  border: 1px solid var(--hair);
+  background: var(--panel);
+  padding: 42px 24px 24px;
+}
+.scripta-page .dg-frame::before {
+  content: attr(data-fig);
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--ink-faint);
+}
+.scripta-page .dg-replay {
+  position: absolute;
+  top: 7px;
+  right: 9px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  padding: 3px 7px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.scripta-page .dg-replay:hover {
+  color: var(--accent);
+  border-color: var(--hair);
+}
+.scripta-page .figure .frame-dg {
+  padding: 42px 24px 22px;
+}
+.scripta-page .dg-hero {
+  width: 100%;
+}
+.scripta-page .dg-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 400px;
+  margin: 0 auto;
+  overflow: visible;
+}
+.scripta-page .dg-hero .dg-wide {
+  max-width: 590px;
+}
+.scripta-page .dg-hero .dg-tall {
+  display: none;
+  max-width: 330px;
+}
+@media (max-width: 560px) {
+  .scripta-page .dg-hero .dg-wide {
+    display: none;
+  }
+  .scripta-page .dg-hero .dg-tall {
+    display: block;
+  }
+  .scripta-page .figure .frame-dg {
+    padding: 36px 10px 16px;
+  }
+  .scripta-page .dg-frame {
+    padding: 38px 8px 16px;
+  }
+}
+.scripta-page .dg-legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-top: 16px;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
+.scripta-page .dg-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.scripta-page .dg-legend .sw {
+  display: inline-block;
+  width: 13px;
+  height: 9px;
+  border-radius: 1.5px;
+}
+.scripta-page .dg-legend .sw-enc {
+  background: var(--accent);
+}
+.scripta-page .dg-legend .sw-pln {
+  background: #fff;
+  border: 1px solid var(--accent);
+}
+
+/* svg ink */
+.scripta-page .dg-svg text {
+  font-family: var(--mono);
+}
+.scripta-page .dg-t {
+  font-size: 11px;
+  fill: #3b3b39;
+}
+.scripta-page .dg-s {
+  font-size: 9.5px;
+  fill: #85857f;
+}
+.scripta-page .dg-k {
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  fill: #85857f;
+}
+.scripta-page .dg-svg .dg-h {
+  font-family: var(--disp);
+  font-size: 12.5px;
+  font-weight: 500;
+  fill: var(--ink);
+}
+.scripta-page .dg-a {
+  font-size: 10.5px;
+  fill: var(--accent);
+}
+.scripta-page .dg-svg .dg-i {
+  font-family: var(--disp);
+  font-size: 12.5px;
+  font-weight: 600;
+  fill: #fff;
+}
+.scripta-page .dg-sup {
+  font-size: 7.5px;
+}
+.scripta-page .dg-box {
+  fill: #fff;
+  stroke: var(--accent);
+  stroke-width: 1;
+}
+.scripta-page .dg-soft {
+  fill: #fbfbfa;
+  stroke: rgba(43, 58, 78, 0.45);
+}
+.scripta-page .dg-danger {
+  fill: #fbf3f1;
+  stroke: #9a4a3a;
+  stroke-dasharray: 3 2;
+}
+.scripta-page .dg-fill {
+  fill: var(--accent);
+}
+.scripta-page .dg-ln {
+  stroke: var(--accent);
+  stroke-width: 1;
+  fill: none;
+}
+.scripta-page .dg-strong {
+  stroke-width: 1.6;
+}
+.scripta-page .dg-dash {
+  stroke: var(--accent);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  fill: none;
+  opacity: 0.7;
+}
+.scripta-page .dg-head {
+  fill: var(--accent);
+}
+.scripta-page .dg-hair {
+  stroke: var(--hair);
+}
+.scripta-page .dg-life {
+  stroke: rgba(43, 58, 78, 0.3);
+  stroke-dasharray: 2 4;
+}
+.scripta-page .dg-rail {
+  stroke: rgba(43, 58, 78, 0.2);
+  stroke-width: 2;
+}
+.scripta-page .dg-store {
+  fill: rgba(61, 86, 112, 0.05);
+  stroke: var(--accent-lift);
+  stroke-dasharray: 4 3;
+}
+.scripta-page .dg-dot {
+  fill: var(--accent);
+}
+.scripta-page .dg-tick {
+  stroke: #fff;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.scripta-page .dg-blob {
+  stroke: rgba(0, 0, 0, 0.18);
+  stroke-width: 1;
+}
+/* a private value: same blob, ringed in a dashed accent line */
+.scripta-page .dg-blob.dg-secret {
+  stroke: var(--accent);
+  stroke-width: 1.4;
+  stroke-dasharray: 2.5 2;
+}
+
+/* build-up (once): hidden until the figure scrolls into view */
+.scripta-page .dg.once:not(.play) .rv,
+.scripta-page .dg.once:not(.play) .pop,
+.scripta-page .dg.once:not(.play) .mv {
+  opacity: 0;
+}
+.scripta-page .dg.play .rv {
+  animation: dg-rv 0.6s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0s) both;
+}
+.scripta-page .dg.play .pop {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dg-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) var(--d, 0s) both;
+}
+.scripta-page .dg.play .mv {
+  animation: dg-mv var(--dur, 1.2s) var(--ease, cubic-bezier(0.45, 0, 0.25, 1)) var(--d, 0s) both;
+}
+@keyframes dg-rv {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes dg-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes dg-mv {
+  0% {
+    opacity: 0;
+    transform: translate(calc(var(--dx) * -1), calc(var(--dy) * -1));
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+/* looping traffic (hero) — paused whenever it's off screen */
+.scripta-page .dg .pk-enc,
+.scripta-page .dg .pk-pln {
+  opacity: 0;
+  animation: dg-enc 3.6s linear var(--delay, 0s) infinite both;
+}
+.scripta-page .dg .pk-enc {
+  fill: var(--accent);
+}
+.scripta-page .dg .pk-pln {
+  fill: #fff;
+  stroke: var(--accent);
+  stroke-width: 1;
+  animation-name: dg-pln;
+}
+.scripta-page .dg .pk-ring {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dg-ring 1.2s ease-out var(--delay, 0s) infinite both;
+}
+.scripta-page .dg.loop:not(.play) .pk {
+  animation-play-state: paused;
+}
+@keyframes dg-enc {
+  0% {
+    opacity: 0;
+    transform: translate(calc(var(--dx) * -1), calc(var(--dy) * -1));
+  }
+  6% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  44%,
+  100% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+}
+@keyframes dg-pln {
+  0%,
+  46% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  52% {
+    opacity: 1;
+  }
+  86% {
+    opacity: 1;
+    transform: translate(var(--dx), var(--dy));
+  }
+  92%,
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy));
+  }
+}
+@keyframes dg-ring {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.6);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scripta-page .dg .pk,
+  .scripta-page .dg-replay {
+    display: none;
   }
 }
 

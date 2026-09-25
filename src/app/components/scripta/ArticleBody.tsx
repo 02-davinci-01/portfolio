@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 import Schematic from "./Schematic";
+import Diagram from "./Diagram";
 import type { Block } from "@/app/scripta/content";
 
 /**
@@ -58,16 +59,78 @@ export default function ArticleBody({ body }: { body: Block[] }) {
             );
           case "gallery":
             return (
-              <figure className="galfig" key={i}>
+              <figure className={`galfig${block.mono ? " mono" : ""}`} key={i}>
                 <div className="galgrid">
                   {block.images.map((im, j) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img key={j} src={im.src} alt={im.alt} loading="lazy" />
+                    <div className="galitem" key={j}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={im.src} alt={im.alt} loading="lazy" />
+                      <span className="galno" aria-hidden="true">
+                        p. {String(j + 1).padStart(2, "0")}
+                      </span>
+                    </div>
                   ))}
                 </div>
                 {block.caption && <figcaption className="figcap">{block.caption}</figcaption>}
               </figure>
             );
+          case "defs":
+            return (
+              <dl className="defs" key={i}>
+                {block.items.map((d) => (
+                  <Fragment key={d.term}>
+                    <dt>{d.term}</dt>
+                    <dd dangerouslySetInnerHTML={{ __html: d.html }} />
+                  </Fragment>
+                ))}
+              </dl>
+            );
+          case "theorem":
+            return (
+              <aside className="thm" key={i}>
+                <div className="thm-k">{block.kicker}</div>
+                <div className="thm-n">{block.name}</div>
+                <div className="thm-s" dangerouslySetInnerHTML={{ __html: block.statement }} />
+                {block.html && <p className="thm-p" dangerouslySetInnerHTML={{ __html: block.html }} />}
+                {block.example && (
+                  <div className="thm-ex">
+                    <span className="thm-exl">e.g.</span>
+                    <span dangerouslySetInnerHTML={{ __html: block.example }} />
+                  </div>
+                )}
+              </aside>
+            );
+          case "math":
+            return (
+              <details className="mathbox" key={i} open={block.open}>
+                <summary>
+                  <span className="mb-t">{block.title}</span>
+                  {block.summary && <span className="mb-s">{block.summary}</span>}
+                  <span className="mb-chev" aria-hidden="true" />
+                </summary>
+                <div className="mb-body">
+                  {block.rows.map((row, j) =>
+                    "sec" in row ? (
+                      <div className="mb-sec" key={j}>
+                        {row.sec}
+                      </div>
+                    ) : (
+                      <div className={`mb-row${row.key ? " key" : ""}`} key={j}>
+                        <span className="mb-who">{row.who}</span>
+                        <span className="mb-eq">
+                          <span className="mb-expr" dangerouslySetInnerHTML={{ __html: row.expr }} />
+                          {row.work && <span className="mb-work" dangerouslySetInnerHTML={{ __html: row.work }} />}
+                        </span>
+                        {row.val && <span className="mb-val">{row.val}</span>}
+                      </div>
+                    ),
+                  )}
+                  {block.foot && <p className="mb-foot" dangerouslySetInnerHTML={{ __html: block.foot }} />}
+                </div>
+              </details>
+            );
+          case "diagram":
+            return <Diagram key={i} name={block.name} fig={block.fig} caption={block.caption} />;
           default:
             return <Fragment key={i} />;
         }

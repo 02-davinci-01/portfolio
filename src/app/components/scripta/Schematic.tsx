@@ -99,6 +99,24 @@ const GLYPHS: Record<SchematicKey, React.ReactNode> = {
       ))}
     </>
   ),
+  /* TLS offloading — a padlock's traffic ends at the LB, which fans plain
+     (dashed) traffic out to its members. */
+  tls: (
+    <>
+      <g stroke={STROKE} strokeWidth={1} fill="none" strokeLinejoin="round">
+        <rect x="14" y="24" width="22" height="17" rx="2" />
+        <path d="M19 24 V18 a6 6 0 0 1 12 0 V24" />
+        <path d="M36 30 L100 30" />
+        <rect x="100" y="16" width="46" height="28" />
+        <path d="M146 30 L196 10 M146 30 L196 30 M146 30 L196 50" strokeDasharray="3 3" />
+        <rect x="196" y="4" width="44" height="12" />
+        <rect x="196" y="24" width="44" height="12" />
+        <rect x="196" y="44" width="44" height="12" />
+      </g>
+      <circle cx="25" cy="32" r="2" fill={STROKE} />
+      <circle cx="123" cy="30" r="2.5" fill={STROKE} />
+    </>
+  ),
 };
 
 export default function Schematic({

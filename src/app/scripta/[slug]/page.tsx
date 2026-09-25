@@ -6,6 +6,7 @@ import ScriptaFooter from "../../components/scripta/ScriptaFooter";
 import ReadingProgress from "../../components/scripta/ReadingProgress";
 import ArticleBody from "../../components/scripta/ArticleBody";
 import Schematic from "../../components/scripta/Schematic";
+import { HeroDiagram } from "../../components/scripta/Diagram";
 import {
   getAllPosts,
   getPostBySlug,
@@ -24,6 +25,7 @@ const HERO_CAPTION: Record<SchematicKey, string> = {
   cache: "Split, scope, cache — the same context, paid for exactly once.",
   graph: "Complexity fanned outward, toward the leaves, where it stays cheap.",
   ptr: "Budget ratio in, creature state out — *ptr lives on the number Cursor stopped showing.",
+  tls: "Encrypted in, plain out — TLS ends at the load balancer so the members behind it never have to.",
 };
 
 export function generateStaticParams() {
@@ -127,8 +129,10 @@ export default async function ArticlePage({
       </header>
 
       <figure className="figure">
-        <div className={`frame${post.heroImage ? " frame-img" : ""}`}>
-          {post.heroImage ? (
+        <div className={`frame${post.heroDiagram ? " frame-dg" : post.heroImage ? " frame-img" : ""}`}>
+          {post.heroDiagram ? (
+            <HeroDiagram name={post.heroDiagram.name} />
+          ) : post.heroImage ? (
             post.heroImage.src ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={post.heroImage.src} alt={post.heroImage.alt} />
@@ -143,7 +147,7 @@ export default async function ArticlePage({
           )}
         </div>
         <figcaption className="figcap">
-          {post.heroImage?.caption ?? HERO_CAPTION[post.schematic]}
+          {post.heroDiagram?.caption ?? post.heroImage?.caption ?? HERO_CAPTION[post.schematic]}
         </figcaption>
       </figure>
 
